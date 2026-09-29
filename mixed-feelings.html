@@ -46,7 +46,7 @@
   }
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .steps li {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 0.9rem;
+    background: var(--leaf); border: 0; border-radius: 0.9rem; font-weight: 600;
     padding: 8px 14px; font-size: 1.05rem; line-height: 1.35;
   }
   .steps b { display: block; font-size: 1.15rem; }
@@ -70,6 +70,9 @@
     padding: 16px; user-select: none; color: var(--ink);
   }
   .words { background: var(--panel); border: 3px solid var(--line); }
+  .box[role="button"] { cursor: pointer; }
+  .box[role="button"]:hover { filter: brightness(0.97); }
+  .box:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
   .words ul { list-style: none; margin: 0; padding: 0; }
   .words li { font-weight: 800; font-size: min(6vh, 6vw, 3.2rem); line-height: 1.2; letter-spacing: -0.01em; }
   .emotion { background: var(--sky); transition: background-color 150ms linear; }
@@ -82,7 +85,7 @@
     padding: 12px; border-radius: 0.9rem; border: 0; cursor: pointer;
     min-height: 58px; color: var(--ink);
   }
-  #pairBtn { background: var(--leaf); font-size: 1.5rem; }
+  #pairBtn { background: var(--teal); font-size: 1.5rem; }
   button.small {
     font-size: 1rem; font-weight: 700; padding: 8px 12px; border-radius: 0.9rem;
     border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer;
@@ -111,8 +114,8 @@
   <h1>Mixed Feelings</h1>
 
   <ol class="steps">
-    <li><b>A</b>Match the emotion to one of the three words.</li>
-    <li><b>B</b>Rank all three words by the emotion.</li>
+    <li><b>A</b>Match the emotion to any of the three words.</li>
+    <li><b>B</b>Rank the three words by the emotion.</li>
     <li><b>C</b>Explain your reasons.</li>
   </ol>
 
@@ -128,11 +131,11 @@
 
   <div class="board">
     <div class="card">
-      <div class="box words" aria-live="polite"><ul id="words"></ul></div>
+      <div class="box words" id="wordsBox" role="button" tabindex="0" aria-label="New words" aria-live="polite"><ul id="words"></ul></div>
       <button class="small" id="wordsBtn" type="button">New words</button>
     </div>
     <div class="card">
-      <div class="box emotion" id="emotionBox" aria-live="polite"><span id="emotion">Sadness</span></div>
+      <div class="box emotion" id="emotionBox" role="button" tabindex="0" aria-label="New emotion" aria-live="polite"><span id="emotion">Sadness</span></div>
       <button class="small" id="emotionBtn" type="button">New emotion</button>
     </div>
   </div>
@@ -148,14 +151,14 @@
   const WORD_SETS = [
     // People
     ["tourist", "artist", "dentist"],
-    ["referee", "firefighter", "footballer"],
+    ["referee", "a football", "footballer"],
     ["influencer", "nurse", "teacher"],
     ["politician", "doctor", "chef"],
-    ["traffic warden", "lifeguard", "surfer"],
+    ["police officer", "lifeguard", "surfer"],
     ["paparazzi", "singer", "fan"],
-    ["tourist", "local", "waiter"],
+    ["mosquito", "local", "waiter"],
     ["ticket inspector", "pilot", "taxi driver"],
-    ["bouncer", "DJ", "barista"],
+    ["bouncer", "DJ", "bar staff"],
     ["head teacher", "coach", "babysitter"],
     ["streamer", "parent", "gamer"],
     ["reality TV star", "actor", "stunt performer"],
@@ -175,12 +178,12 @@
     ["group chat", "emoji", "voice note"],
     ["braces", "sunglasses", "perfume"],
     ["PE kit", "football", "swimming pool"],
-    ["phone ban", "social media", "music"],
+    ["phones", "social media", "music"],
     ["Monday", "Friday", "Sunday"],
     ["queue", "concert", "festival"],
-    ["chores", "pocket money", "sleepover"],
+    ["housework", "pocket money", "sleepover"],
     ["spots", "mirror", "selfie"],
-    ["school dinner", "pizza", "packed lunch"],
+    ["school lunch", "pizza", "cookies"],
     ["curfew", "party", "lie-in"],
     ["detention", "break time", "school trip"],
     ["slow Wi-Fi", "video games", "phone battery"],
@@ -246,8 +249,13 @@
   wordsBtn.addEventListener("click", nextWords);
   emotionBtn.addEventListener("click", nextEmotion);
   pairBtn.addEventListener("click", nextPair);
+  const wordsBox = document.getElementById("wordsBox");
+  [[wordsBox, nextWords], [emotionBox, nextEmotion]].forEach(([el, fn]) => {
+    el.addEventListener("click", fn);
+    el.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); fn(); } });
+  });
   document.addEventListener("keydown", e => {
-    if (e.code === "Space" && !(e.target instanceof HTMLButtonElement)) {
+    if (e.code === "Space" && !(e.target instanceof HTMLButtonElement) && e.target.getAttribute("role") !== "button") {
       e.preventDefault();
       nextPair();
     }
