@@ -115,102 +115,100 @@
   <div class="sentence" id="sentence"></div>
 </button>
 
-<div class="hint" id="hint">tap for another</div>
+<div class="hint hidden" id="hint">tap for another</div>
 <div class="count" id="count"></div>
 
 <script>
-    const questions = [
-      "Can you spell your name?",
-      "Who do you live with?",
-      "What did you have for lunch today?",
-      "What do you do in your free time?",
-      "How often do you go to the cinema?",
-      "How do you usually keep in touch with friends?",
-      "What did you do last night?",
-      "What are you good at?",
-      "When’s your birthday?",
-      "Is English important?",
-      "Apples or oranges?",
-      "What’s one food you would never eat?",
-      "What’s your favourite ice cream flavour?",
-      "What is the best sandwich?",
-      "What’s a good / bad restaurant around here?",
-      "What’s your favourite / least favourite smell?",
-      "What is the most used app on your phone?",
-      "Window or aisle seat?",
-      "Have you ever asked a celebrity for a selfie?",
-      "What advice would you give somebody about learning English?",
-      "What's something you should throw out?",
-      "What’s the best song at the moment?",
-      "What’s the scariest animal ever?",
-      "What are you going to do after class?",
-      "Tell me a lie about your weekend?",
-      "What’s your idea of a perfect playground?",
-      "What happens when you get home from school?",
-      "If you could be anywhere else right now, where would it be?",
-      "How is life similar to school?",
-      "What’s your favourite time of day?",
-      "What is the worst thing about Sundays?",
-      "Describe the rest of your day in 5 words.",
-      "What's your favourite subject?",
-      "When do you have English at school?",
-      "What’s bad about English?",
-      "What would you like to do in the future?",
-      "Why do we have friends?",
-      "Is reading important? Why not?",
-      "What’s your favourite letter of the alphabet?",
-      "What number am I thinking of?",
-      "What was the last thing that made you smile?",
-      "Who is the funniest person you know?",
-      "If I gave you 20 euros, what would you buy?",
-      "Which animal at the zoo do you like best?",
-      "What is one of your favourite places?",
-      "Have you ever travelled out of Spain?",
-      "What are the similarities / differences between summer and winter?",
-      "What are the advantages of having a pet?",
-      "Do you help with jobs around the house?",
-      "What risks are there in English class?",
-      "Who is your favourite sports star?",
-      "Would you rather win an Olympic medal or an Oscar?",
-      "If you could shop for free at one store, which one would you choose?",
-      "What is something people should always do?",
-      "What is something you absolutely hate?",
-      "Which famous person would you like to meet?",
-      "What are you finding difficult at the moment?",
-      "What is the objective of school?",
-      "How could you improve today?",
-      "If we didn’t have trees what would happen?",
-      "What do you think is the most important quality in a teacher?",
-      "What are rules?",
-      "How might school be different in the future?",
-      "What is your first memory of this academy?",
-      "What can you cook?",
-      "What makes for the perfect meal?",
-      "What do you remember from last summer?",
-      "When was the last time you swam?",
-      "Can you describe the sea?",
-      "How many pizzas would fit into this room?",
-      "How many pencils could you fit across this table?",
-      "Can you estimate how many windows there are in your town?",
-      "Can you compare yesterday and today?",
-      "Have you played any games today?",
-      "What’s for dinner tonight?"
-    "What\u2019s stopping you?",
+  const strategies = [
+    "Can you spell your name?",
+    "Who do you live with?",
+    "What did you have for lunch today?",
+    "What do you do in your free time?",
+    "How often do you go to the cinema?",
+    "How do you usually keep in touch with friends?",
+    "What did you do last night?",
+    "What are you good at?",
+    "When’s your birthday?",
+    "Is English important?",
+    "Apples or oranges?",
+    "What’s one food you would never eat?",
+    "What’s your favourite ice cream flavour?",
+    "What is the best sandwich?",
+    "What’s a good / bad restaurant around here?",
+    "What’s your favourite / least favourite smell?",
+    "What is the most used app on your phone?",
+    "Window or aisle seat?",
+    "Have you ever asked a celebrity for a selfie?",
+    "What advice would you give somebody about learning English?",
+    "What's something you should throw out?",
+    "What’s the best song at the moment?",
+    "What’s the scariest animal ever?",
+    "What are you going to do after class?",
+    "Tell me a lie about your weekend?",
+    "What’s your idea of a perfect playground?",
+    "What happens when you get home from school?",
+    "If you could be anywhere else right now, where would it be?",
+    "How is life similar to school?",
+    "What’s your favourite time of day?",
+    "What is the worst thing about Sundays?",
+    "Describe the rest of your day in 5 words.",
+    "What's your favourite subject?",
+    "When do you have English at school?",
+    "What’s bad about English?",
+    "What would you like to do in the future?",
+    "Why do we have friends?",
+    "Is reading important? Why not?",
+    "What’s your favourite letter of the alphabet?",
+    "What number am I thinking of?",
+    "What was the last thing that made you smile?",
+    "Who is the funniest person you know?",
+    "If I gave you 20 euros, what would you buy?",
+    "Which animal at the zoo do you like best?",
+    "What is one of your favourite places?",
+    "Have you ever travelled out of Spain?",
+    "What are the similarities / differences between summer and winter?",
+    "What are the advantages of having a pet?",
+    "Do you help with jobs around the house?",
+    "What risks are there in English class?",
+    "Who is your favourite sports star?",
+    "Would you rather win an Olympic medal or an Oscar?",
+    "If you could shop for free at one store, which one would you choose?",
+    "What is something people should always do?",
+    "What is something you absolutely hate?",
+    "Which famous person would you like to meet?",
+    "What are you finding difficult at the moment?",
+    "What is the objective of school?",
+    "How could you improve today?",
+    "If we didn’t have trees what would happen?",
+    "What do you think is the most important quality in a teacher?",
+    "What are rules?",
+    "How might school be different in the future?",
+    "What is your first memory of this academy?",
+    "What can you cook?",
+    "What makes for the perfect meal?",
+    "What do you remember from last summer?",
+    "When was the last time you swam?",
+    "Can you describe the sea?",
+    "How many pizzas would fit into this room?",
+    "How many pencils could you fit across this table?",
+    "Can you estimate how many windows there are in your town?",
+    "Can you compare yesterday and today?",
+    "Have you played any games today?",
+    "What’s for dinner tonight?",
+    "What’s stopping you?",
     "Can you escape?",
     "Where does it hurt?",
     "What are you looking for?",
     "What word would you put on a T-shirt that sums you up?",
     "If today had a title, what would it be?",
     "Who would play you in a shampoo commercial?",
-    "What is the best sandwich?",
-    "What\u2019s the best thing to put ketchup on?",
+    "What’s the best thing to put ketchup on?",
     "What would you ban if you were in charge for a day?",
-    "What is the most used app on your phone?",
     "What is your motto?",
     "When do you lie?",
     "What would your entrance song be?",
     "What do you refuse to be quiet about?",
-    "What\u2019s one of your favourite restaurants?",
+    "What’s one of your favourite restaurants?",
     "What was the last thing you ate?",
     "What food would you frame as art?",
     "What flavour do you carry from childhood?",
@@ -222,40 +220,52 @@
   const countEl = document.getElementById('count');
   const stageEl = document.getElementById('stage');
 
-  let lastIdx = -1;
+  /* Questions come from a shuffled deck, so none repeats until all have been shown. */
+  let deck = [];
   let shown = 0;
+  let last = null;
 
-  function pickIndex(exclude, max) {
-    if (max <= 1) return 0;
-    let i;
-    do { i = Math.floor(Math.random() * max); } while (i === exclude);
-    return i;
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+
+  function draw() {
+    if (!deck.length) {
+      deck = shuffle(strategies.slice());
+      shown = 0;
+      if (deck.length > 1 && deck[deck.length - 1] === last) deck.unshift(deck.pop());
+    }
+    last = deck.pop();
+    shown++;
+    return last;
   }
 
   function next() {
-    const idx = pickIndex(lastIdx, strategies.length);
-    lastIdx = idx;
-    shown++;
+    const question = draw();
 
     sentenceEl.classList.add('fading');
 
     setTimeout(() => {
-      sentenceEl.textContent = strategies[idx];
+      sentenceEl.textContent = question;
       countEl.textContent = shown + " / " + strategies.length;
       sentenceEl.classList.remove('fading');
     }, 350);
 
-    if (hintEl && !hintEl.classList.contains('hidden')) {
+    /* Show "tap for another" under the first question only, then fade it away. */
+    if (shown === 1 && !hintEl.dataset.used) {
+      hintEl.dataset.used = "yes";
+      hintEl.classList.remove('hidden');
+    } else {
       hintEl.classList.add('hidden');
     }
   }
 
   (function init() {
-    const idx = pickIndex(-1, strategies.length);
-    lastIdx = idx;
-    shown = 1;
-    sentenceEl.textContent = strategies[idx];
-    countEl.textContent = shown + " / " + strategies.length;
+    sentenceEl.textContent = "Tap for a question";
   })();
 
   stageEl.addEventListener('click', next);
