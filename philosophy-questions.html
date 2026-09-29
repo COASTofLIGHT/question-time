@@ -115,7 +115,7 @@
   <div class="sentence" id="sentence"></div>
 </button>
 
-<div class="hint" id="hint">tap for another</div>
+<div class="hint hidden" id="hint">tap for another</div>
 <div class="count" id="count"></div>
 
 <script>
@@ -222,7 +222,7 @@
 "Does insanity have a reason?","Does insanity exist?","Does insanity change?","Does insanity grow?","Does insanity decay?",
 "Do humans have a reason?","Do humans exist?","Do humans change?","Do humans grow?","Do humans decay?",
 "Do animals have a reason?","Do animals exist?","Do animals change?","Do animals grow?","Do animals decay?",
-"Do confusion have a reason?","Do confusion exist?","Do confusion change?","Do confusion grow?","Do confusion decay?",
+"Does confusion have a reason?","Does confusion exist?","Does confusion change?","Does confusion grow?","Does confusion decay?",
 "Does God have a reason?","Does God exist?","Does God change?","Does God grow?","Does God decay?",
 "Does slavery have a reason?","Does slavery exist?","Does slavery change?","Does slavery grow?","Does slavery decay?",
 "Does nature have a reason?","Does nature exist?","Does nature change?","Does nature grow?","Does nature decay?",
@@ -260,40 +260,52 @@
   const countEl = document.getElementById('count');
   const stageEl = document.getElementById('stage');
 
-  let lastIdx = -1;
+  /* Questions come from a shuffled deck, so none repeats until all have been shown. */
+  let deck = [];
   let shown = 0;
+  let last = null;
 
-  function pickIndex(exclude, max) {
-    if (max <= 1) return 0;
-    let i;
-    do { i = Math.floor(Math.random() * max); } while (i === exclude);
-    return i;
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+
+  function draw() {
+    if (!deck.length) {
+      deck = shuffle(strategies.slice());
+      shown = 0;
+      if (deck.length > 1 && deck[deck.length - 1] === last) deck.unshift(deck.pop());
+    }
+    last = deck.pop();
+    shown++;
+    return last;
   }
 
   function next() {
-    const idx = pickIndex(lastIdx, strategies.length);
-    lastIdx = idx;
-    shown++;
+    const question = draw();
 
     sentenceEl.classList.add('fading');
 
     setTimeout(() => {
-      sentenceEl.textContent = strategies[idx];
+      sentenceEl.textContent = question;
       countEl.textContent = shown + " / " + strategies.length;
       sentenceEl.classList.remove('fading');
     }, 350);
 
-    if (hintEl && !hintEl.classList.contains('hidden')) {
+    /* Show "tap for another" under the first question only, then fade it away. */
+    if (shown === 1 && !hintEl.dataset.used) {
+      hintEl.dataset.used = "yes";
+      hintEl.classList.remove('hidden');
+    } else {
       hintEl.classList.add('hidden');
     }
   }
 
   (function init() {
-    const idx = pickIndex(-1, strategies.length);
-    lastIdx = idx;
-    shown = 1;
-    sentenceEl.textContent = strategies[idx];
-    countEl.textContent = shown + " / " + strategies.length;
+    sentenceEl.textContent = "Tap to start philosophising";
   })();
 
   stageEl.addEventListener('click', next);
