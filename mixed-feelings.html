@@ -111,17 +111,17 @@
   <h1>Mixed Feelings</h1>
 
   <ol class="steps">
-    <li><b>A</b>Rank the three words by the emotion.</li>
-    <li><b>B</b>Explain your reasons.</li>
-    <li><b>C</b>Change the words and play again.</li>
+    <li><b>A</b>Match the emotion to any of the three words.</li>
+    <li><b>B</b>Rank the three words by the emotion.</li>
+    <li><b>C</b>Explain your reasons.</li>
   </ol>
 
   <section class="lang" aria-labelledby="langTitle">
     <h2 id="langTitle">Example language</h2>
     <dl>
+      <div><dt>Match:</dt> <dd>The dentist makes me feel scared.</dd></div>
       <div><dt>Rank:</dt> <dd>…comes first / second / last.</dd></div>
-      <div><dt>Compare:</dt> <dd>A dentist is more frightening than an artist.</dd></div>
-      <div><dt>Superlative:</dt> <dd>A spider is the most / least disgusting.</dd></div>
+      <div><dt>Compare:</dt> <dd>Homework is more boring than a haircut.</dd></div>
       <div><dt>Explain:</dt> <dd>…because… / …whereas…</dd></div>
     </dl>
   </section>
@@ -146,50 +146,11 @@
 (function () {
   // Add more trios here — each set is three words.
   const WORD_SETS = [
-    // -ist
     ["tourist", "artist", "dentist"],
-    // -er
-    ["dancer", "teacher", "banker"],
-    ["firefighter", "babysitter", "singer"],
-    ["footballer", "cleaner", "swimmer"],
-    ["influencer", "gamer", "blogger"],
-    // -ian, -or, -ant
-    ["doctor", "actor", "sailor"],
-    // other people
-    ["neighbour", "boss", "parent"],
-    ["pilot", "nurse", "chef"],
-    ["king", "clown", "spy"],
-    ["little brother", "grandma", "best friend"],
-    // characters
-    ["superhero", "ghost", "robot"],
-    ["alien", "vampire", "zombie"],
-    ["dragon", "unicorn", "dinosaur"],
-    // places
-    ["dentist", "airport", "lift"],
-    ["beach", "library", "supermarket"],
-    ["cinema", "theme park", "museum"],
-    ["rollercoaster", "haunted house", "zoo"],
-    // school
-    ["homework", "exams", "PE"],
-    ["maths", "art", "music"],
-    ["school trip", "sleepover", "summer holidays"],
-    // animals
-    ["spider", "fish", "eagle"],
-    ["shark", "cat", "cow"],
-    ["dog", "snake", "penguin"],
-    // food
-    ["olives", "sushi", "lentils"],
-    ["pizza", "broccoli", "chocolate"],
-    // everyday things
-    ["alarm clock", "mirror", "mobile phone"],
-    ["socks", "umbrella", "sofa"],
-    ["video games", "karaoke", "football match"],
-    // times and events
-    ["Monday morning", "birthday", "first day at school"],
-    ["wedding", "Christmas", "holiday"],
-    // weather
-    ["rain", "fog", "heatwave"],
-    ["snow", "thunderstorm", "sunshine"],
+    ["brother", "sister", "cousin"],
+    ["homework", "holiday", "haircut"],
+    ["Monday", "birthday", "holiday"],
+    ["kitchen", "bathroom", "bedroom"],
   ];
 
   const EMOTIONS = [
