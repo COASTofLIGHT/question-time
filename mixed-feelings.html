@@ -44,6 +44,14 @@
     width: 100%; max-width: 860px; padding: 14px 20px 20px;
     display: flex; flex-direction: column; gap: 14px;
   }
+  .back {
+    align-self: flex-start;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .back:hover { text-decoration: underline; }
+  .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .steps li {
     background: var(--leaf); border: 0; border-radius: 0.9rem; font-weight: 600;
@@ -111,11 +119,12 @@
 </head>
 <body>
 <main>
+  <a class="back" href="https://coastoflight.github.io/table-talk/">&larr; Table Talk</a>
   <h1>Mixed Feelings</h1>
 
   <ol class="steps">
-    <li><b>A</b>Match the emotion to any of the three words.</li>
-    <li><b>B</b>Rank the three words by the emotion.</li>
+    <li><b>A</b>Match the emotion to one of the three words.</li>
+    <li><b>B</b>Rank all three words by the emotion.</li>
     <li><b>C</b>Explain your reasons.</li>
   </ol>
 
