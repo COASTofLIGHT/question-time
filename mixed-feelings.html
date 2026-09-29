@@ -62,7 +62,7 @@
   .lang dd { margin: 0; display: inline; font-style: italic; }
 
   .board { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .card { display: flex; flex-direction: column; gap: 10px; }
+  .card { display: flex; flex-direction: column; gap: 8px; }
   .box {
     height: clamp(170px, 34vh, 360px);
     border-radius: 1.1rem;
@@ -82,10 +82,14 @@
     padding: 12px; border-radius: 0.9rem; border: 0; cursor: pointer;
     min-height: 58px; color: var(--ink);
   }
-  #emotionBtn { background: var(--leaf); }
-  #wordsBtn { background: var(--sand); }
+  #pairBtn { background: var(--leaf); font-size: 1.5rem; }
+  button.small {
+    font-size: 1rem; font-weight: 700; padding: 8px 12px; border-radius: 0.9rem;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer;
+  }
+  button.small:hover:not(:disabled) { filter: brightness(0.96); }
   button.big:hover:not(:disabled) { filter: brightness(0.96); }
-  #wordsBtn:disabled { opacity: 0.4; cursor: default; }
+  button.small:disabled { opacity: 0.4; cursor: default; }
 
   @media (max-width: 620px) {
     .steps { grid-template-columns: 1fr; gap: 6px; }
@@ -125,15 +129,17 @@
   <div class="board">
     <div class="card">
       <div class="box words" aria-live="polite"><ul id="words"></ul></div>
-      <button class="big" id="wordsBtn" type="button">New words</button>
+      <button class="small" id="wordsBtn" type="button">New words</button>
     </div>
     <div class="card">
       <div class="box emotion" id="emotionBox" aria-live="polite"><span id="emotion">Sadness</span></div>
-      <button class="big" id="emotionBtn" type="button">New emotion</button>
+      <button class="small" id="emotionBtn" type="button">New emotion</button>
     </div>
   </div>
 
-  <footer>Space bar picks a new emotion.</footer>
+  <button class="big" id="pairBtn" type="button">New pair</button>
+
+  <footer>Space bar picks a new pair.</footer>
 </main>
 
 <script>
@@ -142,53 +148,48 @@
   const WORD_SETS = [
     // -ist
     ["tourist", "artist", "dentist"],
-    ["florist", "journalist", "scientist"],
-    ["cyclist", "pianist", "novelist"],
-    ["guitarist", "receptionist", "therapist"],
-    ["economist", "cartoonist", "violinist"],
-    ["motorist", "chemist", "stylist"],
-    ["psychiatrist", "archaeologist", "hypnotist"],
-    ["optimist", "pessimist", "perfectionist"],
-    ["columnist", "specialist", "activist"],
-    ["ventriloquist", "taxidermist", "nutritionist"],
-    ["finalist", "soloist", "zoologist"],
     // -er
-    ["dancer", "farmer", "banker"],
-    ["teacher", "gardener", "lawyer"],
-    ["firefighter", "babysitter", "baker"],
-    ["photographer", "plumber", "singer"],
-    ["footballer", "cleaner", "reporter"],
-    ["climber", "swimmer", "runner"],
-    ["hairdresser", "butcher", "jeweller"],
+    ["dancer", "teacher", "banker"],
+    ["firefighter", "babysitter", "singer"],
+    ["footballer", "cleaner", "swimmer"],
     ["influencer", "gamer", "blogger"],
-    ["stranger", "lodger", "passenger"],
-    ["skydiver", "zookeeper", "beekeeper"],
     // -ian, -or, -ant
-    ["magician", "electrician", "librarian"],
-    ["musician", "comedian", "politician"],
     ["doctor", "actor", "sailor"],
-    ["inventor", "editor", "tutor"],
-    ["accountant", "assistant", "consultant"],
     // other people
-    ["neighbour", "boss", "ex"],
+    ["neighbour", "boss", "parent"],
     ["pilot", "nurse", "chef"],
     ["king", "clown", "spy"],
+    ["little brother", "grandma", "best friend"],
+    // characters
+    ["superhero", "ghost", "robot"],
+    ["alien", "vampire", "zombie"],
+    ["dragon", "unicorn", "dinosaur"],
     // places
-    ["dentist's waiting room", "airport", "lift"],
+    ["dentist", "airport", "lift"],
     ["beach", "library", "supermarket"],
+    ["cinema", "theme park", "museum"],
+    ["rollercoaster", "haunted house", "zoo"],
+    // school
+    ["homework", "exams", "PE"],
+    ["maths", "art", "music"],
+    ["school trip", "sleepover", "summer holidays"],
     // animals
-    ["spider", "pigeon", "goldfish"],
+    ["spider", "fish", "eagle"],
     ["shark", "cat", "cow"],
+    ["dog", "snake", "penguin"],
     // food
-    ["olives", "sushi", "Brussels sprouts"],
+    ["olives", "sushi", "lentils"],
+    ["pizza", "broccoli", "chocolate"],
     // everyday things
     ["alarm clock", "mirror", "mobile phone"],
     ["socks", "umbrella", "sofa"],
+    ["video games", "karaoke", "football match"],
     // times and events
     ["Monday morning", "birthday", "first day at school"],
-    ["wedding", "job interview", "holiday"],
+    ["wedding", "Christmas", "holiday"],
     // weather
     ["rain", "fog", "heatwave"],
+    ["snow", "thunderstorm", "sunshine"],
   ];
 
   const EMOTIONS = [
@@ -200,9 +201,7 @@
     { name: "Anxiety",       bg: "#F6C99E" },
     { name: "Embarrassment", bg: "#F0C2D3" },
     { name: "Envy",          bg: "#A8D5CB" },
-    { name: "Love",          bg: "#F5A3AF" },
-    { name: "Hate",          bg: "#C4B6AD" },
-    { name: "Surprise",      bg: "#F3E58E" },
+    { name: "Boredom",       bg: "#BCC3E6" },
   ];
 
   const wordsEl = document.getElementById("words");
@@ -210,6 +209,7 @@
   const emotionBox = document.getElementById("emotionBox");
   const emotionEl = document.getElementById("emotion");
   const emotionBtn = document.getElementById("emotionBtn");
+  const pairBtn = document.getElementById("pairBtn");
 
   // Words: shuffled order, cycles through every set before repeating
   let order = [], pos = -1;
@@ -231,24 +231,30 @@
   }
   if (WORD_SETS.length < 2) wordsBtn.disabled = true;
 
-  // Emotions: random, never the same twice in a row
-  let lastEmotion = -1;
+  // Emotions: shuffled order, cycles through all before repeating
+  let eOrder = [], ePos = -1;
   function nextEmotion() {
-    let i;
-    do { i = Math.floor(Math.random() * EMOTIONS.length); } while (i === lastEmotion);
-    lastEmotion = i;
-    const e = EMOTIONS[i];
+    ePos++;
+    if (ePos >= eOrder.length) {
+      const last = eOrder[eOrder.length - 1];
+      eOrder = shuffle(EMOTIONS.map((_, i) => i));
+      if (eOrder.length > 1 && eOrder[0] === last) eOrder.push(eOrder.shift());
+      ePos = 0;
+    }
+    const e = EMOTIONS[eOrder[ePos]];
     emotionBox.style.background = e.bg;
     emotionEl.textContent = e.name;
     emotionEl.classList.remove("pop"); void emotionEl.offsetWidth; emotionEl.classList.add("pop");
   }
+  function nextPair() { nextWords(); nextEmotion(); }
 
   wordsBtn.addEventListener("click", nextWords);
   emotionBtn.addEventListener("click", nextEmotion);
+  pairBtn.addEventListener("click", nextPair);
   document.addEventListener("keydown", e => {
     if (e.code === "Space" && !(e.target instanceof HTMLButtonElement)) {
       e.preventDefault();
-      nextEmotion();
+      nextPair();
     }
   });
 
