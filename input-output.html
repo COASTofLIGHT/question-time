@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Input Output</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist: #EDF3F2;
+    --ink: #10303A;
+    --ink-soft: #456670;
+    --focus: #0B62A4;
+    --panel: #F9FBFB;
+    --line: rgba(16, 48, 58, 0.14);
+    --teal: #A8D5CB;
+    --sand: #F2D9A6;
+    --coral: #F4B5A0;
+    --lilac: #C9C3EA;
+    --sky: #A9CCEB;
+    --rose: #F0C2D3;
+    --leaf: #C7DE9F;
+    --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; min-height: 100%;
+    background: var(--mist); color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  main {
+    width: 100%; max-width: 1100px; padding: 14px 24px 24px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; margin: 0; letter-spacing: -0.02em; line-height: 1.05; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .steps li {
+    background: var(--leaf); border-radius: 0.9rem;
+    padding: 8px 14px; font-size: 1.05rem; line-height: 1.35; font-weight: 600;
+  }
+  .steps b { display: block; font-size: 1.15rem; }
+
+  /* Stage 1: words */
+  .prompts {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;
+    counter-reset: n;
+  }
+  .prompts li {
+    counter-increment: n;
+    display: grid; grid-template-columns: 2.2rem 1fr; gap: 2px 10px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 0.9rem;
+    padding: 8px 12px;
+  }
+  .prompts li::before {
+    content: counter(n);
+    grid-row: span 2;
+    width: 2.2rem; height: 2.2rem; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--c); font-weight: 800; font-size: 1.05rem;
+  }
+  .prompts label { font-size: 1rem; color: var(--ink-soft); font-weight: 600; }
+  .pair { display: flex; gap: 8px; }
+  .prompts input {
+    width: 100%; min-width: 0;
+    font: inherit; font-size: 1.25rem; font-weight: 700; color: var(--ink);
+    padding: 6px 10px; border-radius: 0.6rem;
+    border: 2px solid var(--line); background: #fff;
+  }
+  .prompts input::placeholder { color: #9AB0B6; font-weight: 500; }
+  .prompts input:focus { outline: none; border-color: var(--focus); }
+
+  /* Stage 2: questions */
+  .questions {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;
+    counter-reset: q;
+  }
+  .questions li {
+    counter-increment: q;
+    display: grid; grid-template-columns: 2.4rem 1fr; gap: 12px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 0.9rem;
+    padding: 12px 14px;
+    font-size: clamp(1.2rem, 2.1vw, 1.7rem); font-weight: 600; line-height: 1.3;
+    animation: rise 320ms ease-out both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .questions li::before {
+    content: counter(q);
+    width: 2.4rem; height: 2.4rem; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--c); font-weight: 800; font-size: 1.1rem;
+  }
+  .questions mark {
+    background: var(--c); color: var(--ink);
+    padding: 0 0.3em; border-radius: 0.35em; font-weight: 800;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
+  .questions mark.guess { background: transparent; box-shadow: inset 0 -0.18em 0 var(--c); color: var(--ink-soft); }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .li-1 { --c: var(--teal); }  .li-2 { --c: var(--sand); }  .li-3 { --c: var(--coral); }
+  .li-4 { --c: var(--lilac); } .li-5 { --c: var(--sky); }   .li-6 { --c: var(--rose); }
+  .li-7 { --c: var(--leaf); }  .li-8 { --c: var(--teal); }  .li-9 { --c: var(--sand); }
+  .li-10 { --c: var(--coral); }
+
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; }
+  button {
+    font: inherit; font-weight: 800; cursor: pointer; color: var(--ink);
+    border: 0; border-radius: 0.9rem;
+  }
+  button:hover { filter: brightness(0.96); }
+  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+  .primary { background: var(--teal); font-size: 1.4rem; padding: 12px 28px; min-height: 58px; flex: 1; }
+  .secondary { background: var(--panel); border: 1px solid var(--line); font-size: 1.05rem; padding: 10px 18px; font-weight: 700; }
+
+  [hidden] { display: none !important; }
+
+  /* Fit everything on one screen when projected */
+  @media (min-width: 761px) {
+    html, body { height: 100%; }
+    body { overflow: hidden; }
+    main { height: 100%; padding: 1.2vh 24px 1.8vh; gap: 1.4vh; }
+    h1 { font-size: clamp(1.6rem, 4.6vh, 2.6rem); }
+    .back { font-size: clamp(0.8rem, 1.8vh, 0.95rem); }
+    .steps li { padding: 0.8vh 14px; font-size: clamp(0.9rem, 2.1vh, 1.1rem); }
+    .steps b { font-size: clamp(1rem, 2.3vh, 1.2rem); }
+    #wordsStage, #questionsStage { flex: 1; min-height: 0; display: flex; }
+    #wordsStage[hidden], #questionsStage[hidden] { display: none; }
+    .prompts, .questions { flex: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1.2vh 18px; }
+    .prompts li { padding: 0.6vh 12px; gap: 0.3vh 10px; }
+    .prompts label { font-size: clamp(0.85rem, 2vh, 1.05rem); }
+    .prompts input { font-size: clamp(1rem, 2.8vh, 1.4rem); padding: 0.4vh 10px; }
+    .prompts li::before, .questions li::before { width: 4.4vh; height: 4.4vh; font-size: 2vh; }
+    .questions li { padding: 0.8vh 14px; font-size: clamp(1rem, 3.1vh, 1.8rem); grid-template-columns: 4.4vh 1fr; }
+    .primary { min-height: 0; padding: 1.2vh 28px; font-size: clamp(1.1rem, 3vh, 1.5rem); }
+    .secondary { padding: 1vh 18px; font-size: clamp(0.9rem, 2.1vh, 1.1rem); }
+  }
+
+
+  @media (max-width: 760px) {
+    .steps { grid-template-columns: 1fr; gap: 6px; }
+    .steps b { display: inline; margin-right: 6px; }
+    .prompts, .questions { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .questions li { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="https://coastoflight.github.io/table-talk/">&larr; Table Talk</a>
+  <h1>Input Output</h1>
+
+  <ol class="steps">
+    <li><b>1</b>Suggest a word for each prompt.</li>
+    <li><b>2</b>Press Boom.</li>
+    <li><b>3</b>Work with a partner or group.</li>
+  </ol>
+
+  <section id="wordsStage">
+    <ol class="prompts" id="prompts"></ol>
+  </section>
+
+  <section id="questionsStage" hidden>
+    <ol class="questions" id="questions" aria-live="polite"></ol>
+  </section>
+
+  <div class="controls">
+    <button class="primary" id="makeBtn" type="button">Boom</button>
+    <button class="secondary" id="editBtn" type="button" hidden>Change words</button>
+    <button class="secondary" id="clearBtn" type="button">Start again</button>
+  </div>
+</main>
+
+<script>
+(function () {
+  // Each item: the prompt, its example placeholder(s), and the question it feeds.
+  // Use {0} (and {1}) where the word(s) go in the question.
+  const ITEMS = [
+    { prompt: "An activity you enjoy doing",       eg: ["basketball"],            q: "What is the objective of {0}?" },
+    { prompt: "Something you sometimes do",         eg: ["go to the cinema"],      q: "When was the last time you {0}?", form: "past" },
+    { prompt: "An everyday activity (-ing)",        eg: ["cooking"],               q: "Do you agree that {0} is important?", form: "ing" },
+    { prompt: "A place in your town",               eg: ["the beach"],             q: "What is a benefit of {0}?" },
+    { prompt: "Another place in your town",         eg: ["the library"],           q: "What is the worst thing about {0}?" },
+    { prompt: "Two subjects at school",             eg: ["maths", "history"],      q: "Which is better: {0} or {1}?" },
+    { prompt: "Two countries on our planet",        eg: ["Spain", "Japan"],        q: "Are there any similarities between {0} and {1}?" },
+    { prompt: "An app, game or website",            eg: ["YouTube"],              q: "What problems can {0} cause?" },
+    { prompt: "Your favourite sport or hobby",      eg: ["swimming"],              q: "What advice could you give someone about {0}?" },
+    { prompt: "An object in the house (plural)",    eg: ["chairs"],                q: "How might {0} be different in the future?" },
+  ];
+
+
+  // ---- Verb helpers: turn "go to the cinema" into "went to the cinema", "cook" into "cooking"
+  const IRREGULAR = {
+    be:"was", become:"became", begin:"began", bite:"bit", blow:"blew", break:"broke", bring:"brought",
+    build:"built", buy:"bought", catch:"caught", choose:"chose", come:"came", cost:"cost", cut:"cut",
+    dig:"dug", do:"did", draw:"drew", dream:"dreamt", drink:"drank", drive:"drove", eat:"ate", fall:"fell",
+    feed:"fed", feel:"felt", fight:"fought", find:"found", fly:"flew", forget:"forgot", forgive:"forgave",
+    freeze:"froze", get:"got", give:"gave", go:"went", grow:"grew", hang:"hung", have:"had", hear:"heard",
+    hide:"hid", hit:"hit", hold:"held", hurt:"hurt", keep:"kept", know:"knew", lead:"led", learn:"learnt",
+    leave:"left", lend:"lent", let:"let", lie:"lay", lose:"lost", make:"made", mean:"meant", meet:"met",
+    pay:"paid", put:"put", quit:"quit", read:"read", ride:"rode", ring:"rang", rise:"rose", run:"ran",
+    say:"said", see:"saw", sell:"sold", send:"sent", set:"set", shake:"shook", shine:"shone", shoot:"shot",
+    show:"showed", shut:"shut", sing:"sang", sink:"sank", sit:"sat", sleep:"slept", slide:"slid",
+    speak:"spoke", spend:"spent", spill:"spilt", stand:"stood", steal:"stole", stick:"stuck", sting:"stung",
+    swim:"swam", swing:"swung", take:"took", teach:"taught", tear:"tore", tell:"told", think:"thought",
+    throw:"threw", understand:"understood", wake:"woke", wear:"wore", win:"won", write:"wrote"
+  };
+  const PAST_FORMS = new Set(Object.values(IRREGULAR));
+  const DOUBLE = new Set(["travel","cancel","label","level","model","quarrel","signal","control","patrol","prefer","refer","admit","commit","regret","forbid","upset","permit","occur"]);
+  const isVowel = c => "aeiou".includes(c);
+  function doublesFinal(v) {
+    if (DOUBLE.has(v)) return true;
+    const n = v.length;
+    if (n < 3) return false;
+    const [a, b, c] = [v[n-3], v[n-2], v[n-1]];
+    const oneSyllable = (v.match(/[aeiouy]+/g) || []).length === 1;
+    return oneSyllable && !isVowel(a) && isVowel(b) && !isVowel(c) && !"wxy".includes(c);
+  }
+  function toPast(v) {
+    if (IRREGULAR[v]) return IRREGULAR[v];
+    if (PAST_FORMS.has(v)) return v;
+    if (/ed$/.test(v)) return v;
+    if (/e$/.test(v)) return v + "d";
+    if (/[^aeiou]y$/.test(v)) return v.slice(0, -1) + "ied";
+    if (doublesFinal(v)) return v + v.slice(-1) + "ed";
+    return v + "ed";
+  }
+  function toIng(v) {
+    if (/ing$/.test(v)) return v;
+    if (v === "be" || v === "see") return v + "ing";
+    if (/ie$/.test(v)) return v.slice(0, -2) + "ying";
+    if (/[^e]e$/.test(v)) return v.slice(0, -1) + "ing";
+    if (doublesFinal(v)) return v + v.slice(-1) + "ing";
+    return v + "ing";
+  }
+  // Change only the first word, keep the rest ("play football" -> "played football")
+  function reform(text, form) {
+    const m = text.match(/^(\s*)(to\s+)?([A-Za-z]+)(.*)$/);
+    if (!m) return text;
+    const verb = m[3].toLowerCase();
+    const changed = form === "past" ? toPast(verb) : toIng(verb);
+    return changed + m[4];
+  }
+
+  const promptsEl = document.getElementById("prompts");
+  const questionsEl = document.getElementById("questions");
+  const wordsStage = document.getElementById("wordsStage");
+  const questionsStage = document.getElementById("questionsStage");
+  const makeBtn = document.getElementById("makeBtn");
+  const editBtn = document.getElementById("editBtn");
+  const clearBtn = document.getElementById("clearBtn");
+
+  // Build the prompt boxes
+  const inputs = [];
+  ITEMS.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.className = "li-" + (i + 1);
+    const id = "w" + i;
+    const label = document.createElement("label");
+    label.htmlFor = id + "a";
+    label.textContent = item.prompt;
+    const wrap = document.createElement("div");
+    wrap.className = "pair";
+    item.eg.forEach((eg, j) => {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = id + (j ? "b" : "a");
+      input.placeholder = eg;
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      if (item.eg.length > 1) input.setAttribute("aria-label", item.prompt + " (" + (j + 1) + ")");
+      wrap.appendChild(input);
+      inputs.push(input);
+    });
+    li.append(label, wrap);
+    promptsEl.appendChild(li);
+  });
+
+  // Enter moves to the next box; on the last box it makes the questions
+  inputs.forEach((input, k) => {
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (k < inputs.length - 1) inputs[k + 1].focus();
+        else makeQuestions();
+      }
+    });
+  });
+
+  function makeQuestions() {
+    questionsEl.innerHTML = "";
+    let k = 0;
+    ITEMS.forEach((item, i) => {
+      const li = document.createElement("li");
+      li.className = "li-" + (i + 1);
+      li.style.setProperty("--i", i);
+      const words = item.eg.map(() => inputs[k++]);
+      const text = document.createElement("span");
+      item.q.split(/(\{\d\})/).forEach(part => {
+        const m = part.match(/^\{(\d)\}$/);
+        if (m) {
+          const input = words[+m[1]];
+          const mark = document.createElement("mark");
+          const typed = input.value.trim();
+          let word = typed || input.placeholder;
+          if (item.form) word = reform(word, item.form);
+          mark.textContent = word;
+          if (!typed) mark.classList.add("guess");
+          text.appendChild(mark);
+        } else if (part) {
+          text.appendChild(document.createTextNode(part));
+        }
+      });
+      li.appendChild(text);
+      questionsEl.appendChild(li);
+    });
+    wordsStage.hidden = true;
+    questionsStage.hidden = false;
+    makeBtn.hidden = true;
+    editBtn.hidden = false;
+    editBtn.focus();
+  }
+
+  function editWords() {
+    questionsStage.hidden = true;
+    wordsStage.hidden = false;
+    makeBtn.hidden = false;
+    editBtn.hidden = true;
+    inputs[0].focus();
+  }
+
+  function startAgain() {
+    inputs.forEach(i => { i.value = ""; });
+    editWords();
+  }
+
+  makeBtn.addEventListener("click", makeQuestions);
+  editBtn.addEventListener("click", editWords);
+  clearBtn.addEventListener("click", startAgain);
+})();
+</script>
+</body>
+</html>
