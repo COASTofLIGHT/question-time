@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Complete the Sentence — 60</title>
+<title>Complete the Sentence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -115,70 +115,74 @@
   <div class="sentence" id="sentence"></div>
 </button>
 
-<div class="hint" id="hint">tap for another</div>
+<div class="hint hidden" id="hint">tap for another</div>
 <div class="count" id="count"></div>
 
 <script>
-  const sentences = [
-    "Happiness is\u2026",
-    "On Mondays\u2026",
-    "In my free time\u2026",
-    "My favourite\u2026",
-    "Yesterday\u2026",
-    "In the future\u2026",
-    "I never\u2026",
-    "I always\u2026",
-    "One place I would love to visit is\u2026",
-    "My favourite meal to cook is\u2026",
-    "A hobby I enjoy is\u2026",
-    "My dream job is\u2026",
-    "My favourite type of weather is\u2026",
-    "If I could study any subject at university, it would be\u2026",
-    "The best part of my day is\u2026",
-    "An interesting fact about my hometown is\u2026",
-    "My favourite social media platform is\u2026",
-    "The most useful technology for me is\u2026",
-    "If I could start a YouTube channel, it would be about\u2026",
-    "A new skill I want to learn this year is\u2026",
-    "A language I would love to learn is\u2026",
-    "An outdoor activity I enjoy is\u2026",
-    "The best gift I've ever received was\u2026",
-    "My best friend is\u2026",
-    "On weekends, I usually\u2026",
-    "My favourite film is\u2026",
-    "The last book I read was\u2026",
-    "My favourite season is\u2026",
-    "I'm afraid of\u2026",
-    "My family is\u2026",
-    "I feel happy when\u2026",
-    "My favourite sport is\u2026",
-    "The last time I laughed a lot was\u2026",
-    "If I had more time, I would\u2026",
-    "My favourite animal is\u2026",
-    "I usually eat breakfast at\u2026",
-    "My favourite colour is\u2026",
-    "At school, I'm good at\u2026",
-    "My favourite song right now is\u2026",
-    "I get nervous when\u2026",
-    "My perfect weekend would be\u2026",
-    "The last holiday I went on was\u2026",
-    "I would love to meet\u2026",
-    "My favourite time of day is\u2026",
-    "I feel proud when\u2026",
-    "If I won the lottery, I would\u2026",
-    "My favourite app is\u2026",
-    "The best advice I've ever received is\u2026",
-    "I relax by\u2026",
-    "Yesterday\u2026",
-   "Last year\u2026",
- "I was born\u2026",
- "I have never\u2026"
+  const strategies = [
+    "Happiness is…",
+    "On Mondays…",
+    "In my free time…",
+    "My favourite…",
+    "Yesterday…",
+    "In the future…",
+    "I never…",
+    "I always…",
+    "One place I would love to visit is…",
+    "My favourite meal to cook is…",
+    "A hobby I enjoy is…",
+    "My dream job is…",
+    "My favourite type of weather is…",
+    "If I could study any subject at university, it would be…",
+    "The best part of my day is…",
+    "An interesting fact about my hometown is…",
+    "My favourite social media platform is…",
+    "The most useful technology for me is…",
+    "If I could start a YouTube channel, it would be about…",
+    "A new skill I want to learn this year is…",
+    "A language I would love to learn is…",
+    "An outdoor activity I enjoy is…",
+    "The best gift I've ever received was…",
+    "My best friend is…",
+    "On weekends, I usually…",
+    "My favourite film is…",
+    "The last book I read was…",
+    "My favourite season is…",
+    "I'm afraid of…",
+    "My family is…",
+    "I feel happy when…",
+    "My favourite sport is…",
+    "The last time I laughed a lot was…",
+    "If I had more time, I would…",
+    "My favourite animal is…",
+    "I usually eat breakfast at…",
+    "My favourite colour is…",
+    "At school, I'm good at…",
+    "My favourite song right now is…",
+    "I get nervous when…",
+    "My perfect weekend would be…",
+    "The last holiday I went on was…",
+    "I would love to meet…",
+    "My favourite time of day is…",
+    "I feel proud when…",
+    "If I won the lottery, I would…",
+    "My favourite app is…",
+    "The best advice I've ever received is…",
+    "I relax by…",
+    "Last year…",
+    "I was born…",
+    "I have never…"
   ];
 
   const sentenceEl = document.getElementById('sentence');
   const hintEl = document.getElementById('hint');
   const countEl = document.getElementById('count');
   const stageEl = document.getElementById('stage');
+
+  /* Questions come from a shuffled deck, so none repeats until all have been shown. */
+  let deck = [];
+  let shown = 0;
+  let last = null;
 
   function shuffle(list) {
     for (let i = list.length - 1; i > 0; i--) {
@@ -188,37 +192,39 @@
     return list;
   }
 
-  /* Draws from a shuffled deck so every sentence is used once before any repeat. */
-  let deck = [];
-  let current = null;
-  let shown = 0;
+  function draw() {
+    if (!deck.length) {
+      deck = shuffle(strategies.slice());
+      shown = 0;
+      if (deck.length > 1 && deck[deck.length - 1] === last) deck.unshift(deck.pop());
+    }
+    last = deck.pop();
+    shown++;
+    return last;
+  }
 
   function next() {
-    if (!deck.length) deck = shuffle(sentences.slice());
-    let s = deck.pop();
-    if (s === current && deck.length) s = deck.pop();
-    current = s;
-    shown++;
+    const question = draw();
 
     sentenceEl.classList.add('fading');
 
     setTimeout(() => {
-      sentenceEl.textContent = s;
-      countEl.textContent = shown + " / " + sentences.length;
+      sentenceEl.textContent = question;
+      countEl.textContent = shown + " / " + strategies.length;
       sentenceEl.classList.remove('fading');
     }, 350);
 
-    if (hintEl && !hintEl.classList.contains('hidden')) {
+    /* Show "tap for another" under the first question only, then fade it away. */
+    if (shown === 1 && !hintEl.dataset.used) {
+      hintEl.dataset.used = "yes";
+      hintEl.classList.remove('hidden');
+    } else {
       hintEl.classList.add('hidden');
     }
   }
 
   (function init() {
-    deck = shuffle(sentences.slice());
-    current = deck.pop();
-    shown = 1;
-    sentenceEl.textContent = current;
-    countEl.textContent = shown + " / " + sentences.length;
+    sentenceEl.textContent = "Tap to begin.";
   })();
 
   stageEl.addEventListener('click', next);
