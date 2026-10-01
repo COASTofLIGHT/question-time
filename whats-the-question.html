@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What's the Question?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist: #EDF3F2;
+    --ink: #10303A;
+    --ink-soft: #456670;
+    --focus: #0B62A4;
+    --panel: #F9FBFB;
+    --line: rgba(16, 48, 58, 0.14);
+    /* Level colours, as in Word Lab */
+    --a1: #F2D9A6;  /* sand yellow */
+    --a2: #F4B5A0;  /* coral orange */
+    --b1: #A9CCEB;  /* sky blue */
+    --b2: #A8D5CB;  /* sea green */
+    --level: var(--a2);
+    --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; min-height: 100%;
+    background: var(--mist); color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
+  }
+  main {
+    max-width: 960px; margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2rem);
+    display: flex; flex-direction: column; gap: 0.8rem;
+  }
+  button { font-family: var(--font); color: var(--ink); }
+  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .hint { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 1.05rem; }
+
+  /* Pickers */
+  .row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; align-items: center; }
+  fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  legend { float: left; margin-right: 8px; color: var(--ink-soft); font-size: 0.95rem; }
+  .seg { position: relative; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg span {
+    display: inline-block; padding: 8px 15px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 1rem;
+  }
+  .seg input:checked + span { background: var(--ink); color: var(--mist); border-color: var(--ink); }
+  .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+  /* Level chips show their colour when picked */
+  .levels .seg input:checked + span { color: var(--ink); border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; }
+  .levels .seg input[value="a1"]:checked + span { background: var(--a1); }
+  .levels .seg input[value="a2"]:checked + span { background: var(--a2); }
+  .levels .seg input[value="b1"]:checked + span { background: var(--b1); }
+  .levels .seg input[value="b2"]:checked + span { background: var(--b2); }
+
+  /* The box */
+  .box {
+    position: relative;
+    border: 0; width: 100%; cursor: pointer; text-align: left;
+    background: var(--level);
+    border-radius: 1.4rem;
+    min-height: clamp(240px, 44vh, 420px);
+    padding: clamp(1.4rem, 4vw, 3rem);
+    display: flex; flex-direction: column; justify-content: center; gap: 1rem;
+    transition: background-color 250ms ease;
+  }
+  .box:hover { filter: brightness(0.99); }
+  .count {
+    position: absolute; top: 1rem; right: 1.3rem;
+    font-size: 0.85rem; opacity: 0.55; font-variant-numeric: tabular-nums;
+  }
+  .label { margin: 0; font-size: 1rem; font-weight: 700; opacity: 0.7; }
+  .content { display: flex; flex-direction: column; gap: 1.2rem; transition: opacity 300ms ease; }
+  .content.fading { opacity: 0; }
+  .answer {
+    margin: 0;
+    font-size: clamp(2.2rem, 6vw, 4.2rem); font-weight: 800;
+    line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .answer::before { content: "\201C"; }
+  .answer::after { content: "\201D"; }
+  .example {
+    margin: 0; font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    background: var(--panel); border-radius: 0.8rem; padding: 0.6em 0.9em; align-self: flex-start;
+  }
+  .example span { color: var(--ink-soft); font-size: 0.8em; display: block; margin-bottom: 0.15em; }
+  .example b { font-weight: 800; }
+  .example[hidden] { display: none; }
+
+  .controls { display: flex; justify-content: flex-end; gap: 0.8rem; flex-wrap: wrap; }
+  .reveal { display: flex; flex-direction: column; align-items: flex-start; gap: 0.7rem; min-height: 3.6rem; }
+  .show {
+    border: 2px solid var(--ink); cursor: pointer; border-radius: 0.8rem; background: transparent;
+    font-size: 1.05rem; font-weight: 700; padding: 8px 18px;
+  }
+  .show:hover { background: rgba(255, 255, 255, 0.45); }
+  .show[hidden] { display: none; }
+  .next {
+    border: 0; cursor: pointer; border-radius: 0.9rem; background: var(--ink); color: var(--mist);
+    font-size: 1.4rem; font-weight: 800; padding: 12px 34px; min-height: 56px;
+  }
+  .next:hover { background: #1B4652; }
+
+  footer { color: var(--ink-soft); font-size: 0.85rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .content, .box { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
+
+  <header>
+    <h1>What's the Question?</h1>
+    <p class="hint">Here's the answer. Can you make the question?</p>
+  </header>
+
+  <div class="row">
+    <fieldset class="levels">
+      <legend>Level</legend>
+      <label class="seg"><input type="radio" name="level" value="a1"><span>A1</span></label>
+      <label class="seg"><input type="radio" name="level" value="a2" checked><span>A2</span></label>
+      <label class="seg"><input type="radio" name="level" value="b1"><span>B1</span></label>
+      <label class="seg"><input type="radio" name="level" value="b2"><span>B2</span></label>
+    </fieldset>
+  </div>
+
+  <div class="box" id="box">
+    <span class="count" id="count"></span>
+    <div class="content" id="content">
+      <span class="label">The answer is…</span>
+      <p class="answer" id="answer" aria-live="polite"></p>
+      <div class="reveal">
+        <button class="show" type="button" id="show">Show an example question</button>
+        <p class="example" id="example" hidden><span>One possible question</span><b id="question"></b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="next" type="button" id="next">Next</button>
+  </div>
+
+  <footer>Tap the box, press Next or press Space for a new answer. There's usually more than one good question, so the one shown is just an example.</footer>
+</main>
+
+<script>
+(function () {
+  /* [answer, one possible question] by level */
+  const ITEMS = {
+    a1: [
+      ["Yes, I am.", "Are you happy today?"],
+      ["No, I'm not.", "Are you tired?"],
+      ["Yes, I can.", "Can you swim?"],
+      ["No, I can't.", "Can you play the piano?"],
+      ["Yes, I do.", "Do you like pizza?"],
+      ["No, I don't.", "Do you have a dog?"],
+      ["Yes, I have.", "Have you got a brother?"],
+      ["No, she isn't.", "Is your teacher from London?"],
+      ["Yes, he does.", "Does your dad like football?"],
+      ["Twelve.", "How old are you?"],
+      ["Blue.", "What's your favourite colour?"],
+      ["In Madrid.", "Where do you live?"],
+      ["At eight o'clock.", "What time do you get up?"],
+      ["Pizza.", "What's your favourite food?"],
+      ["My mum.", "Who cooks dinner in your house?"],
+      ["Two brothers.", "Have you got any brothers or sisters?"],
+      ["By bus.", "How do you go to school?"],
+      ["On Saturday.", "When is your football match?"],
+      ["It's sunny.", "What's the weather like today?"],
+      ["It's red.", "What colour is your bag?"],
+      ["Three.", "How many pets have you got?"],
+      ["In the kitchen.", "Where is the cat?"],
+      ["It's Tom's.", "Whose bag is this?"],
+      ["Football.", "What sport do you like?"],
+      ["A cat.", "What pet have you got?"],
+      ["In July.", "When is your birthday?"],
+      ["I'm fine, thanks.", "How are you?"],
+      ["Maths.", "What's your favourite subject?"],
+      ["Spain.", "Where are you from?"],
+      ["It's three euros.", "How much is the sandwich?"],
+      ["Under the table.", "Where is the ball?"],
+      ["Every day.", "How often do you play video games?"],
+      ["Milk.", "What do you drink for breakfast?"],
+      ["Ana.", "What's your best friend's name?"],
+      ["My bedroom.", "What's your favourite room in your house?"],
+      ["Yes, there is.", "Is there a park near your house?"],
+      ["No, there aren't.", "Are there any shops near your school?"],
+      ["Black and white.", "What colour is a zebra?"],
+      ["Six.", "How many legs has an insect got?"],
+      ["At school.", "Where are you on Monday morning?"],
+      ["Twenty-five.", "How many students are in your class?"],
+      ["The red one.", "Which bike is yours?"],
+      ["After school.", "When do you play football?"],
+      ["Chocolate.", "What's your favourite ice cream?"],
+      ["It's ten o'clock.", "What time is it?"],
+      ["Yes, please.", "Do you want some water?"],
+      ["No, thanks.", "Would you like a sandwich?"],
+      ["Ten.", "How many fingers have you got?"],
+      ["Monday.", "What day is it today?"],
+      ["My grandma.", "Who is in this photo?"]
+    ],
+    a2: [
+      ["Yes, I did.", "Did you watch TV last night?"],
+      ["No, I wasn't.", "Were you at home yesterday?"],
+      ["Twice a week.", "How often do you play basketball?"],
+      ["Last summer.", "When did you go to the beach?"],
+      ["London.", "Where did you go on holiday?"],
+      ["Because I was tired.", "Why did you go to bed early?"],
+      ["For two hours.", "How long did you study yesterday?"],
+      ["About twenty minutes.", "How long does it take you to get to school?"],
+      ["My grandparents.", "Who did you visit at the weekend?"],
+      ["I'm going to visit my cousins.", "What are you going to do this weekend?"],
+      ["Yes, I'm going to.", "Are you going to watch the match?"],
+      ["I'm doing my homework.", "What are you doing right now?"],
+      ["My sister.", "Who's taller, you or your sister?"],
+      ["It was great!", "How was your holiday?"],
+      ["Pasta with tomato sauce.", "What did you have for dinner?"],
+      ["Never.", "How often do you eat sushi?"],
+      ["On foot.", "How did you get to school today?"],
+      ["Ten euros.", "How much did your T-shirt cost?"],
+      ["In 2012.", "When were you born?"],
+      ["Because it's fun.", "Why do you like skateboarding?"],
+      ["Rainy and cold.", "What was the weather like yesterday?"],
+      ["A new phone.", "What did you get for your birthday?"],
+      ["Yes, it was.", "Was the film good?"],
+      ["At the cinema.", "Where did you meet your friends?"],
+      ["Three times.", "How many times did you go swimming last week?"],
+      ["The blue one, please.", "Which T-shirt do you want?"],
+      ["When I was six.", "When did you learn to ride a bike?"],
+      ["Not very well.", "How well do you speak French?"],
+      ["Next Friday.", "When is your next exam?"],
+      ["About 300 kilometres.", "How far is Madrid from here?"],
+      ["My dad.", "Who taught you to swim?"],
+      ["About thirty people.", "How many people came to the party?"],
+      ["Yes, I'd love to.", "Would you like to come to my party?"],
+      ["Sorry, I can't.", "Can you help me after school?"],
+      ["Funny and kind.", "What's your best friend like?"],
+      ["She's got long brown hair.", "What does your sister look like?"],
+      ["Pink and purple.", "What colour are your new trainers?"],
+      ["Basketball and tennis.", "What sports do you play?"],
+      ["The bus was late.", "Why were you late for school?"],
+      ["It's my brother's.", "Whose phone is this?"],
+      ["Yes, there was.", "Was there a lot of traffic?"],
+      ["Once a month.", "How often do you go to the cinema?"],
+      ["In the evening.", "When do you usually do your homework?"],
+      ["Science fiction.", "What kind of films do you like?"],
+      ["Two weeks.", "How long was your holiday?"],
+      ["A sandwich and an apple.", "What did you have for lunch?"],
+      ["It was really boring.", "What did you think of the book?"],
+      ["He's a doctor.", "What does your dad do?"],
+      ["Spanish and English.", "What languages do you speak?"],
+      ["Yes, I'm going to the gym.", "Are you doing anything after school?"]
+    ],
+    b1: [
+      ["Yes, I have.", "Have you ever been to London?"],
+      ["No, never.", "Have you ever eaten snails?"],
+      ["Since 2020.", "How long have you lived here?"],
+      ["For about three years.", "How long have you been learning the guitar?"],
+      ["I used to play the piano.", "Did you have any hobbies when you were younger?"],
+      ["I'd buy a house by the sea.", "What would you do if you won a lot of money?"],
+      ["Probably engineering.", "What would you like to study at university?"],
+      ["It depends on the weather.", "Are you going to the beach tomorrow?"],
+      ["Not yet.", "Have you finished your homework?"],
+      ["Just now.", "When did you arrive?"],
+      ["I'd rather stay at home.", "Do you want to go out tonight?"],
+      ["Because I needed some fresh air.", "Why did you go for a walk?"],
+      ["In the 18th century.", "When was this castle built?"],
+      ["In China.", "Where were these trainers made?"],
+      ["By a famous architect.", "Who was this building designed by?"],
+      ["I've just finished it.", "Have you finished the book yet?"],
+      ["Twice, I think.", "How many times have you been on a plane?"],
+      ["About an hour a day.", "How much time do you spend on your phone?"],
+      ["I'm not sure yet.", "What are you going to do when you finish school?"],
+      ["Yes, if it doesn't rain.", "Will you come to the park on Saturday?"],
+      ["I think it's a great idea.", "What do you think about having a longer summer holiday?"],
+      ["It's a kind of fruit.", "What's a mango?"],
+      ["Someone who repairs cars.", "What's a mechanic?"],
+      ["Because I wanted to practise my English.", "Why did you watch the film in English?"],
+      ["I'd probably call my parents.", "What would you do if you lost your phone?"],
+      ["Ever since I was a child.", "How long have you liked drawing?"],
+      ["It's much easier than I expected.", "What's the new video game like?"],
+      ["Neither, actually.", "Do you prefer cats or dogs?"],
+      ["A bit nervous, to be honest.", "How do you feel about your exams?"],
+      ["I've never tried it.", "Do you like surfing?"],
+      ["Next week, hopefully.", "When will you get your results?"],
+      ["Because it's too expensive.", "Why don't you buy a new laptop?"],
+      ["The one with the red cover.", "Which book did you borrow?"],
+      ["We should recycle more.", "What can we do to help the environment?"],
+      ["It's been raining all day.", "What's the weather been like today?"],
+      ["It's getting better.", "How's your English these days?"],
+      ["My cousin, who lives in Ireland.", "Who are you going to visit this summer?"],
+      ["As soon as I get home.", "When are you going to call me?"],
+      ["I was having a shower.", "What were you doing when I called you?"],
+      ["About fifty kilometres from here.", "How far is the nearest airport?"],
+      ["Yes, it's worth it.", "Is the museum worth visiting?"],
+      ["Mostly pop and rap.", "What kind of music do you usually listen to?"],
+      ["I'd love to be a vet.", "What do you want to be in the future?"],
+      ["At least eight hours.", "How many hours of sleep do you need?"],
+      ["I haven't decided yet.", "What are you going to wear to the party?"],
+      ["Not as good as the book.", "What did you think of the film?"],
+      ["Yes, I'd recommend it.", "Would you recommend the restaurant?"],
+      ["Because I forgot my keys.", "Why couldn't you get into the house?"],
+      ["I'd go to Japan.", "If you could go anywhere, where would you go?"],
+      ["Not unless it's an emergency.", "Can I use my phone in class?"]
+    ],
+    b2: [
+      ["I wish I had.", "Did you go to the concert?"],
+      ["I'd have taken a taxi.", "What would you have done if you'd missed the last train?"],
+      ["It must have been the cat.", "Who knocked the vase over?"],
+      ["He might have forgotten.", "Why hasn't Sam replied to my message?"],
+      ["Not as far as I know.", "Has the test been cancelled?"],
+      ["By the end of the month, hopefully.", "When do you think you'll have finished your project?"],
+      ["It's being repaired.", "Why can't we use the lift?"],
+      ["For ages!", "How long have you been waiting?"],
+      ["That she'd be late.", "What did Maria say when she called?"],
+      ["It's not really my cup of tea.", "Do you like opera?"],
+      ["I'd rather not say.", "How much did your new phone cost?"],
+      ["It depends on who you ask.", "Is social media good or bad for teenagers?"],
+      ["If I'd known, I would have come.", "Did you know there was a party on Saturday?"],
+      ["Ever since I moved here.", "How long have you been interested in surfing?"],
+      ["Not that I'm aware of.", "Is there anything we need to bring tomorrow?"],
+      ["Yes, although it was harder than I expected.", "Did you pass your driving theory test?"],
+      ["It was called off because of the storm.", "What happened to the match?"],
+      ["I'm thinking of studying abroad.", "What are your plans after school?"],
+      ["I should have studied more.", "Is there anything you regret about your exams?"],
+      ["I'm used to it by now.", "Don't you mind getting up so early?"],
+      ["I can't stand it.", "How do you feel about waiting in queues?"],
+      ["It's supposed to be really good.", "Have you heard anything about the new series?"],
+      ["Hardly ever, to be honest.", "How often do you read the news?"],
+      ["I'll have finished by then.", "Will you still be doing your homework at nine?"],
+      ["He's said to be the best player in the world.", "Why is everyone talking about him?"],
+      ["I couldn't agree more.", "Don't you think we have too much homework?"],
+      ["Not exactly, but close.", "Did you get the answer right?"],
+      ["Because I'd left my wallet at home.", "Why did you have to borrow money?"],
+      ["Probably not, unless it stops raining.", "Are you still going to the beach later?"],
+      ["We're having it delivered.", "How are you going to get the new sofa home?"],
+      ["About as much as anyone else.", "How much do you use social media?"],
+      ["I'm not sure it was worth the money.", "What did you think of the concert?"],
+      ["Whoever finishes first.", "Who gets the last slice of pizza?"],
+      ["It's the first time I've ever done this.", "Have you ever done anything like this before?"],
+      ["I'd sooner walk, thanks.", "Would you like a lift to the station?"],
+      ["They were supposed to arrive an hour ago.", "Why do you keep checking the time?"],
+      ["Mainly because of the price.", "Why didn't you buy the trainers?"],
+      ["It took me ages to get used to it.", "Was it hard to start at a new school?"],
+      ["Yes, as long as you're back by ten.", "Can I go to the party on Friday?"],
+      ["I had my hair cut.", "Why do you look different today?"],
+      ["Somewhere warm, preferably by the sea.", "Where would you like to go on holiday?"],
+      ["I'd been working on it for weeks.", "Why were you so happy when you finished the project?"],
+      ["Not unless I have to.", "Do you ever go to bed before ten?"],
+      ["It was a complete waste of time.", "Was the trip to the museum interesting?"],
+      ["Looking back, yes.", "Was changing schools the right decision?"],
+      ["It's hard to say.", "Who do you think will win the league?"],
+      ["I've no idea what it means.", "Do you know this word?"],
+      ["Only if it's free.", "Would you go to a classical music concert?"],
+      ["Too much, apparently.", "How much time do you spend gaming?"],
+      ["I'm really looking forward to it.", "How do you feel about the school trip?"]
+    ]
+  };
+
+  const $ = id => document.getElementById(id);
+  const val = name => document.querySelector(`input[name="${name}"]:checked`).value;
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+  /* A shuffled deck per level, so nothing repeats until all 50 have been shown */
+  const decks = {};
+  function draw(lv) {
+    let d = decks[lv];
+    if (!d || !d.cards.length) {
+      const last = d ? d.last : null;
+      d = decks[lv] = { cards: shuffle(ITEMS[lv].slice()), last, shown: 0 };
+      if (d.cards.length > 1 && d.cards[d.cards.length - 1] === last) d.cards.unshift(d.cards.pop());
+    }
+    d.last = d.cards.pop();
+    d.shown++;
+    return d.last;
+  }
+
+  const content = $("content");
+  function next() {
+    const lv = val("level");
+    const item = draw(lv);
+    content.classList.add("fading");
+    setTimeout(() => {
+      $("answer").textContent = item[0];
+      $("question").textContent = item[1];
+      $("example").hidden = true;
+      $("show").hidden = false;
+      $("count").textContent = decks[lv].shown + " / " + ITEMS[lv].length;
+      content.classList.remove("fading");
+    }, 220);
+  }
+  function showExample(e) {
+    e.stopPropagation();          /* don't move on to the next answer */
+    $("example").hidden = false;
+    $("show").hidden = true;
+  }
+  function setLevel() {
+    document.documentElement.style.setProperty("--level", `var(--${val("level")})`);
+    next();
+  }
+
+  $("box").addEventListener("click", next);
+  $("next").addEventListener("click", next);
+  $("show").addEventListener("click", showExample);
+  $("example").addEventListener("click", e => e.stopPropagation());
+  document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", setLevel));
+  document.addEventListener("keydown", e => {
+    if (e.code !== "Space" && e.key !== "Enter") return;
+    if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLInputElement || e.target instanceof HTMLAnchorElement) return;
+    e.preventDefault();
+    next();
+  });
+
+  setLevel();
+})();
+</script>
+</body>
+</html>
