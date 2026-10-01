@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>All About You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist: #EDF3F2;
+    --ink: #10303A;
+    --ink-soft: #456670;
+    --focus: #0B62A4;
+    --panel: #F9FBFB;
+    --line: rgba(16, 48, 58, 0.14);
+    /* Level colours, as in Word Lab */
+    --a1: #F2D9A6;  /* sand yellow */
+    --a2: #F4B5A0;  /* coral orange */
+    --b1: #A9CCEB;  /* sky blue */
+    --b2: #A8D5CB;  /* sea green */
+    --level: var(--a2);
+    --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; min-height: 100%;
+    background: var(--mist); color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
+  }
+  main {
+    max-width: 960px; margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2rem);
+    display: flex; flex-direction: column; gap: 0.8rem;
+  }
+  button { font-family: var(--font); color: var(--ink); }
+  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .hint { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 1.05rem; }
+
+  /* Pickers */
+  .row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; align-items: center; }
+  fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  legend { float: left; margin-right: 8px; color: var(--ink-soft); font-size: 0.95rem; }
+  .seg { position: relative; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg span {
+    display: inline-block; padding: 8px 15px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 1rem;
+  }
+  .seg input:checked + span { background: var(--ink); color: var(--mist); border-color: var(--ink); }
+  .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+  /* Level chips show their colour when picked */
+  .levels .seg input:checked + span { color: var(--ink); border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; }
+  .levels .seg input[value="a1"]:checked + span { background: var(--a1); }
+  .levels .seg input[value="a2"]:checked + span { background: var(--a2); }
+  .levels .seg input[value="b1"]:checked + span { background: var(--b1); }
+  .levels .seg input[value="b2"]:checked + span { background: var(--b2); }
+
+  /* The box */
+  .box {
+    position: relative;
+    border: 0; width: 100%; cursor: pointer; text-align: left;
+    background: var(--level);
+    border-radius: 1.4rem;
+    min-height: clamp(240px, 46vh, 440px);
+    padding: clamp(1.4rem, 4vw, 3rem);
+    display: flex; flex-direction: column; justify-content: center; gap: 1.4rem;
+    transition: background-color 250ms ease;
+  }
+  .box:hover { filter: brightness(0.98); }
+  .count {
+    position: absolute; top: 1rem; right: 1.3rem;
+    font-size: 0.85rem; color: var(--ink); opacity: 0.55; font-variant-numeric: tabular-nums;
+  }
+  .content { transition: opacity 300ms ease; }
+  .content.fading { opacity: 0; }
+  .sentence {
+    margin: 0;
+    font-size: clamp(1.9rem, 5.2vw, 3.6rem); font-weight: 700;
+    line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .conn {
+    display: inline-block; background: var(--ink); color: var(--mist);
+    border-radius: 0.35em; padding: 0 0.3em; margin-left: 0.1em;
+  }
+  .word {
+    margin: 1.2rem 0 0; font-size: clamp(1.05rem, 2.2vw, 1.35rem); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .word b {
+    background: var(--panel); border-radius: 0.6rem; padding: 0.2em 0.6em;
+    font-size: clamp(1.4rem, 3.4vw, 2.1rem); font-weight: 800; letter-spacing: -0.01em;
+  }
+  .word[hidden] { display: none; }
+
+  .controls { display: flex; justify-content: flex-end; }
+  .next {
+    border: 0; cursor: pointer; border-radius: 0.9rem; background: var(--ink); color: var(--mist);
+    font-size: 1.4rem; font-weight: 800; padding: 12px 34px; min-height: 56px;
+  }
+  .next:hover { background: #1B4652; }
+
+  footer { color: var(--ink-soft); font-size: 0.85rem; }
+
+  @media (max-width: 520px) {
+    .box { min-height: 260px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .content, .box { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
+
+  <header>
+    <h1>All About You</h1>
+    <p class="hint">Questions about you. Answer, then say a bit more.</p>
+  </header>
+
+  <div class="row">
+    <fieldset class="levels">
+      <legend>Level</legend>
+      <label class="seg"><input type="radio" name="level" value="a1"><span>A1</span></label>
+      <label class="seg"><input type="radio" name="level" value="a2" checked><span>A2</span></label>
+      <label class="seg"><input type="radio" name="level" value="b1"><span>B1</span></label>
+      <label class="seg"><input type="radio" name="level" value="b2"><span>B2</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Twist</legend>
+      <label class="seg"><input type="radio" name="twist" value="none" checked><span>None</span></label>
+      <label class="seg"><input type="radio" name="twist" value="word"><span>Word</span></label>
+    </fieldset>
+  </div>
+
+  <button class="box" id="box" type="button" aria-label="Show another question">
+    <span class="count" id="count"></span>
+    <span class="content" id="content">
+      <p class="sentence" id="sentence"></p>
+      <p class="word" id="word" hidden>Use the word <b id="wordText"></b> in your answer</p>
+    </span>
+  </button>
+
+  <div class="controls">
+    <button class="next" type="button" id="next">Next</button>
+  </div>
+
+  <footer>Tap the box, press Next, or press Space for a new question.</footer>
+</main>
+
+<script>
+(function () {
+  /* ---------- Part 1 style questions by level ---------- */
+  const STARTERS = {
+    a1: [
+      "What's your name?",
+      "Where do you live?",
+      "What's your favourite colour?",
+      "Have you got a pet?",
+      "What's your favourite animal?",
+      "Have you got any brothers or sisters?",
+      "What do you do after school?",
+      "What's your favourite food?",
+      "What do you eat for breakfast?",
+      "What's in your bag today?",
+      "Can you swim?",
+      "Do you like football?",
+      "What's in your bedroom?",
+      "What's your favourite day of the week?",
+      "What's the weather like today?",
+      "What do you do at the weekend?",
+      "What's your favourite sport?",
+      "What's your favourite fruit?",
+      "Who is your best friend?",
+      "What's your favourite game?",
+      "What's your favourite TV programme?",
+      "What can you do well?",
+      "What do you like doing in summer?",
+      "What's your favourite subject at school?",
+      "When is your birthday?"
+    ],
+    a2: [
+      "Where do you live?",
+      "Who do you live with?",
+      "What's your favourite subject at school?",
+      "How do you get to school every day?",
+      "What do you usually do after school?",
+      "What did you do last weekend?",
+      "What's your favourite food?",
+      "What time do you usually get up?",
+      "Do you like sport? Which sport do you like?",
+      "What do you like doing with your friends?",
+      "Tell me about your best friend.",
+      "Tell me about your bedroom.",
+      "What's your favourite day of the week? Why?",
+      "Where did you go on your last holiday?",
+      "Do you like reading? What do you read?",
+      "What music do you like?",
+      "What's the weather like in your town today?",
+      "What do you usually eat for breakfast?",
+      "Do you have any pets?",
+      "What do you like doing at the weekend?",
+      "How often do you use a computer?",
+      "Tell me about your favourite teacher.",
+      "What did you do on your last birthday?",
+      "What's your favourite place in your town?",
+      "What are you going to do next summer?"
+    ],
+    b1: [
+      "Tell me about the people you live with.",
+      "What do you like about the area where you live?",
+      "Tell me about a typical school day for you.",
+      "How do you usually spend your weekends?",
+      "Tell me about something you enjoyed doing last month.",
+      "What kind of films do you enjoy watching? Why?",
+      "Tell me about a hobby you'd like to try.",
+      "How much time do you spend on your phone each day?",
+      "Do you prefer spending time indoors or outdoors? Why?",
+      "Tell me about a place you'd like to visit in the future.",
+      "What do you enjoy most about learning English?",
+      "How do you usually celebrate your birthday?",
+      "Tell me about a sport you enjoy watching or playing.",
+      "What do you like to do when the weather is bad?",
+      "Tell me about your favourite meal.",
+      "Do you prefer to study alone or with other people? Why?",
+      "What are your plans for the next school holidays?",
+      "Tell me about a good friend and why you get on well.",
+      "What kind of music do you listen to when you want to relax?",
+      "Tell me about a trip you went on with your school.",
+      "Do you like cooking? What can you make?",
+      "What job would you like to do in the future?",
+      "How has your town changed since you were younger?",
+      "Tell me about something you're good at.",
+      "What's the best way to spend a free afternoon?"
+    ],
+    b2: [
+      "What do you enjoy most about the place where you live?",
+      "Would you like to live in a different country one day? Why or why not?",
+      "How important is it to spend time with your family?",
+      "Do you prefer to plan your free time or be spontaneous?",
+      "What's the most useful thing you've learned this year?",
+      "How do you think you'll use English in the future?",
+      "Tell me about a book, film or series that made a strong impression on you.",
+      "Do you think you spend too much time online?",
+      "What do you do to relax when you're feeling stressed about exams?",
+      "If you could learn a new skill, what would it be and why?",
+      "How do you usually keep in touch with your friends?",
+      "What do you think makes a good teacher?",
+      "Is there a tradition in your family that you particularly enjoy?",
+      "Would you rather go on holiday to a busy city or somewhere quiet? Why?",
+      "What's something you're looking forward to at the moment?",
+      "How important is fashion to you?",
+      "Do you think it's better to have a few close friends or lots of friends?",
+      "Tell me about a time you tried something for the first time.",
+      "What kind of things do you and your friends disagree about?",
+      "How do you think your life will be different in ten years?",
+      "Is it important to do sport regularly? Why?",
+      "What would your ideal weekend look like?",
+      "Do you prefer reading the news or watching it? Why?",
+      "What's a piece of technology you couldn't live without?",
+      "Who has had the biggest influence on you so far?"
+    ]
+  };
+
+  /* ---------- Words to use, by level (concrete, teen-friendly) ---------- */
+  const WORDS = {
+    a1: ["apple","ball","bike","bird","book","bus","cake","cat","chair","chocolate","computer","dog",
+         "door","duck","egg","fish","flower","football","garden","guitar","hat","horse","ice cream",
+         "kite","lemon","monkey","moon","orange","park","pencil","phone","pizza","rabbit","rain",
+         "robot","sandwich","sea","shoe","snake","snow","sun","table","tree","TV","water","window","zoo"],
+    a2: ["airport","backpack","beach","birthday","blanket","bridge","camera","castle","cinema","cloud",
+         "competition","concert","desert","dictionary","festival","forest","fridge","gift","headphones",
+         "helmet","homework","island","jacket","kitchen","ladder","laptop","library","map","market",
+         "mountain","museum","passport","piano","pillow","postcard","river","skateboard","sofa",
+         "stadium","suitcase","swimming pool","tent","ticket","torch","towel","umbrella","wallet","waterfall"],
+    b1: ["advertisement","alarm clock","ambulance","audience","battery","cartoon","challenge","charity",
+         "costume","crowd","decoration","documentary","engine","exhibition","firework","fountain","gadget",
+         "headline","hero","instrument","journey","lighthouse","magazine","mirror","mystery","neighbour",
+         "opportunity","painting","password","planet","podcast","recipe","rumour","scarf","secret",
+         "souvenir","storm","stranger","subtitles","sunglasses","timetable","tournament","traffic",
+         "trophy","volunteer","wildlife"],
+    b2: ["ambition","architecture","atmosphere","awareness","campaign","celebrity","compromise",
+         "curiosity","deadline","dilemma","drone","empathy","experiment","fame","gap year","generation",
+         "habit","heritage","imagination","influencer","inspiration","landscape","legacy","masterpiece",
+         "nostalgia","obstacle","patience","pollution","privacy","procrastination","reputation","routine",
+         "satellite","sculpture","skyscraper","streaming","sustainability","talent","teamwork",
+         "tradition","trend","virtual reality","wisdom"]
+  };
+
+
+  /* ---------- Helpers ---------- */
+  const $ = id => document.getElementById(id);
+  const val = name => document.querySelector(`input[name="${name}"]:checked`).value;
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+  /* A shuffled deck per list, so nothing repeats until everything has been shown */
+  const decks = {};
+  function draw(key, list) {
+    let d = decks[key];
+    if (!d || !d.cards.length) {
+      const last = d ? d.last : null;
+      d = decks[key] = { cards: shuffle(list.slice()), last, shown: 0 };
+      if (d.cards.length > 1 && d.cards[d.cards.length - 1] === last) d.cards.unshift(d.cards.pop());
+    }
+    d.last = d.cards.pop();
+    d.shown++;
+    return d.last;
+  }
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  const box = $("box"), content = $("content");
+  let current = null;
+
+  function render() {
+    const lv = val("level"), tw = val("twist");
+    const useWord = tw === "word";
+    let html = esc(current.starter);
+    $("sentence").innerHTML = html;
+    $("wordText").textContent = current.word;
+    $("word").hidden = !useWord;
+    $("count").textContent = decks["s-" + lv].shown + " / " + STARTERS[lv].length;
+  }
+
+  function next() {
+    const lv = val("level");
+    current = {
+      starter: draw("s-" + lv, STARTERS[lv]),
+      word: draw("w-" + lv, WORDS[lv])
+    };
+    content.classList.add("fading");
+    setTimeout(() => { render(); content.classList.remove("fading"); }, 220);
+  }
+
+  function setLevel() {
+    document.documentElement.style.setProperty("--level", `var(--${val("level")})`);
+    next();
+  }
+
+  box.addEventListener("click", next);
+  $("next").addEventListener("click", next);
+  document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", setLevel));
+  /* Changing the twist keeps the same sentence and just adds or removes the extras */
+  document.querySelectorAll('input[name="twist"]').forEach(r => r.addEventListener("change", render));
+
+  document.addEventListener("keydown", e => {
+    if (e.code !== "Space" && e.key !== "Enter") return;
+    if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLInputElement || e.target instanceof HTMLAnchorElement) return;
+    e.preventDefault();
+    next();
+  });
+
+  setLevel();
+})();
+</script>
+</body>
+</html>
