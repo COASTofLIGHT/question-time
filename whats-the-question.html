@@ -89,7 +89,7 @@
   .content.fading { opacity: 0; }
   .answer {
     margin: 0;
-    font-size: clamp(2.2rem, 6vw, 4.2rem); font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800;
     line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance;
   }
   .answer::before { content: "\201C"; }
@@ -105,11 +105,10 @@
   .controls { display: flex; justify-content: flex-end; gap: 0.8rem; flex-wrap: wrap; }
   .reveal { display: flex; flex-direction: column; align-items: flex-start; gap: 0.7rem; min-height: 3.6rem; }
   .show {
-    border: 2px solid var(--ink); cursor: pointer; border-radius: 0.8rem; background: transparent;
-    font-size: 1.05rem; font-weight: 700; padding: 8px 18px;
+    border: 2px solid var(--ink); cursor: pointer; border-radius: 0.9rem; background: var(--panel);
+    font-size: 1.2rem; font-weight: 700; padding: 10px 22px; min-height: 56px;
   }
-  .show:hover { background: rgba(255, 255, 255, 0.45); }
-  .show[hidden] { display: none; }
+  .show:hover { background: #fff; }
   .next {
     border: 0; cursor: pointer; border-radius: 0.9rem; background: var(--ink); color: var(--mist);
     font-size: 1.4rem; font-weight: 800; padding: 12px 34px; min-height: 56px;
@@ -148,13 +147,13 @@
       <span class="label">The answer is…</span>
       <p class="answer" id="answer" aria-live="polite"></p>
       <div class="reveal">
-        <button class="show" type="button" id="show">Show an example question</button>
         <p class="example" id="example" hidden><span>One possible question</span><b id="question"></b></p>
       </div>
     </div>
   </div>
 
   <div class="controls">
+    <button class="show" type="button" id="show">Show an example question</button>
     <button class="next" type="button" id="next">Next</button>
   </div>
 
@@ -407,15 +406,15 @@
       $("answer").textContent = item[0];
       $("question").textContent = item[1];
       $("example").hidden = true;
-      $("show").hidden = false;
+      $("show").textContent = "Show an example question";
       $("count").textContent = decks[lv].shown + " / " + ITEMS[lv].length;
       content.classList.remove("fading");
     }, 220);
   }
-  function showExample(e) {
-    e.stopPropagation();          /* don't move on to the next answer */
-    $("example").hidden = false;
-    $("show").hidden = true;
+  function toggleExample() {
+    const ex = $("example");
+    ex.hidden = !ex.hidden;
+    $("show").textContent = ex.hidden ? "Show an example question" : "Hide the example";
   }
   function setLevel() {
     document.documentElement.style.setProperty("--level", `var(--${val("level")})`);
@@ -424,7 +423,7 @@
 
   $("box").addEventListener("click", next);
   $("next").addEventListener("click", next);
-  $("show").addEventListener("click", showExample);
+  $("show").addEventListener("click", toggleExample);
   $("example").addEventListener("click", e => e.stopPropagation());
   document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", setLevel));
   document.addEventListener("keydown", e => {
