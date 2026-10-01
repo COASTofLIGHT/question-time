@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Question Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist: #EDF3F2;
+    --ink: #10303A;
+    --ink-soft: #456670;
+    --focus: #0B62A4;
+    --panel: #F9FBFB;
+    --line: rgba(16, 48, 58, 0.14);
+    /* Zones, after the original chart's blue, yellow, green and brown */
+    --facts: #A9CCEB;    /* blue: ask for facts */
+    --reasons: #F2D9A6;  /* yellow: ask for reasons */
+    --imagine: #C7DE9F;  /* green: imagine and predict */
+    --ideas: #D9B48F;    /* brown: opinions and ideas */
+    --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; min-height: 100%;
+    background: var(--mist); color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
+  }
+  main {
+    max-width: 1100px; margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2rem);
+    display: flex; flex-direction: column; gap: 0.8rem;
+  }
+  button { font-family: var(--font); color: var(--ink); }
+  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .hint { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 1.05rem; }
+
+  /* Pickers */
+  .row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; align-items: center; }
+  fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  legend { float: left; margin-right: 8px; color: var(--ink-soft); font-size: 0.95rem; }
+  .seg { position: relative; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg span {
+    display: inline-block; padding: 8px 15px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 1rem;
+  }
+  .seg input:checked + span { background: var(--ink); color: var(--mist); border-color: var(--ink); }
+  .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  /* The chart fills the width now */
+  .chart {
+    display: grid; grid-template-columns: minmax(4.4rem, auto) repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .head {
+    display: grid; place-items: center; text-align: center;
+    font-weight: 700; font-size: clamp(0.85rem, 1.7vw, 1.15rem); line-height: 1.1;
+    padding: 0.35rem 0.2rem; border-radius: 0.6rem;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .head.col { align-self: end; white-space: pre-line; }
+  .head.rowh { justify-items: start; padding-left: 0.5rem; font-size: clamp(0.95rem, 2vw, 1.3rem); }
+  .head.on { background: var(--ink); color: var(--mist); }
+  .cell {
+    border: 0; border-radius: 0.7rem; cursor: pointer;
+    min-height: clamp(44px, 7.2vh, 72px);
+    padding: 0.3rem;
+    font-size: clamp(0.85rem, 1.7vw, 1.15rem); font-weight: 700; line-height: 1.1;
+    overflow-wrap: anywhere; hyphens: auto;
+    transition: transform 120ms ease;
+  }
+  .cell.facts { background: var(--facts); }
+  .cell.reasons { background: var(--reasons); }
+  .cell.imagine { background: var(--imagine); }
+  .cell.ideas { background: var(--ideas); }
+  .cell { position: relative; }
+  .cell .num { opacity: 0.6; font-size: 1.05em; }
+  .cell .tag { position: absolute; top: 0.3rem; left: 0.45rem; font-size: 0.68rem; font-weight: 700; opacity: 0.6; }
+  .cell.shown { font-weight: 800; }
+  .cell:hover:not(:disabled) { filter: brightness(0.96); }
+  .cell:disabled { background: var(--panel); color: transparent; border: 2px dashed var(--line); cursor: default; }
+  .cell.current { background: var(--ink); color: var(--mist); transform: scale(1.04); }
+
+  .below { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem 1.4rem; flex-wrap: wrap; }
+  .key b { color: var(--ink); }
+  .key { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.95rem; color: var(--ink-soft); }
+  .key span::before {
+    content: ""; display: inline-block; vertical-align: -0.12em;
+    width: 1em; height: 1em; border-radius: 0.3em; margin-right: 0.35em;
+    background: var(--k);
+  }
+  .key .off { opacity: 0.35; }
+  .clear {
+    border: 1px solid var(--line); background: var(--panel); cursor: pointer; border-radius: 0.8rem;
+    font-size: 1rem; font-weight: 700; padding: 8px 18px;
+  }
+  .clear:hover { background: #fff; }
+
+  footer { color: var(--ink-soft); font-size: 0.85rem; }
+  footer a { color: inherit; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cell, .head { transition: none; }
+    .cell.current { transform: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
+
+  <header>
+    <h1>The Question Creator</h1>
+    <p class="hint">Tap a square. Make a question that starts with those two words and uses the word in the square.</p>
+  </header>
+
+  <div class="row">
+    <fieldset>
+      <legend>Level</legend>
+      <label class="seg"><input type="radio" name="level" value="1"><span>A1</span></label>
+      <label class="seg"><input type="radio" name="level" value="2" checked><span>A2</span></label>
+      <label class="seg"><input type="radio" name="level" value="3"><span>B1</span></label>
+      <label class="seg"><input type="radio" name="level" value="4"><span>B2</span></label>
+    </fieldset>
+  </div>
+
+  <div class="chart" id="chart" aria-label="Question chart. Tap a square to show a word."></div>
+
+  <div class="below">
+    <div class="key" id="key">
+      <span style="--k: var(--facts)" data-z="1"><b>Blue</b> facts, A1 words</span>
+      <span style="--k: var(--reasons)" data-z="2"><b>Yellow</b> reasons, A2 words</span>
+      <span style="--k: var(--imagine)" data-z="3"><b>Green</b> imagine and predict, B1 words</span>
+      <span style="--k: var(--ideas)" data-z="4"><b>Brown</b> opinions and ideas, B2 words</span>
+    </div>
+    <button class="clear" type="button" id="clear">Clear the chart</button>
+  </div>
+
+  <footer>Based on the question chart from <a href="https://onthesamepageelt.wordpress.com/2017/08/31/question-charts/">On the same page ELT</a>, shared under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>. Tap a square again for a new word.</footer>
+</main>
+
+<script>
+(function () {
+  const QW = ["What", "Who", "Where", "When", "How", "Why"];
+  const AUX = ["is / are", "do / does / did", "can", "would", "will", "might / could"];
+
+  /* Zones, as in the original chart. Each colour is numbered 1 to 4 and draws its word from one level. */
+  const ZONES = {
+    1: { cls: "facts",   lv: "a1", colour: "Blue" },
+    2: { cls: "reasons", lv: "a2", colour: "Yellow" },
+    3: { cls: "imagine", lv: "b1", colour: "Green" },
+    4: { cls: "ideas",   lv: "b2", colour: "Brown" }
+  };
+  function zoneOf(r, c) {
+    const modal = c >= 3, howWhy = r >= 4;
+    if (!modal && !howWhy) return 1;
+    if (!modal && howWhy) return 2;
+    if (modal && !howWhy) return 3;
+    return 4;
+  }
+
+  /* Words by level (concrete, teen-friendly) */
+  const WORDS = {
+    a1: ["apple","ball","bike","bird","book","bus","cake","cat","chair","chocolate","computer","dog",
+         "door","duck","egg","fish","flower","football","garden","guitar","hat","horse","ice cream",
+         "kite","lemon","monkey","moon","orange","park","pencil","phone","pizza","rabbit","rain",
+         "robot","sandwich","sea","shoe","snake","snow","sun","table","tree","TV","water","window","zoo"],
+    a2: ["airport","backpack","beach","birthday","blanket","bridge","camera","castle","cinema","cloud",
+         "competition","concert","desert","dictionary","festival","forest","fridge","gift","headphones",
+         "helmet","homework","island","jacket","kitchen","ladder","laptop","library","map","market",
+         "mountain","museum","passport","piano","pillow","postcard","river","skateboard","sofa",
+         "stadium","suitcase","swimming pool","tent","ticket","torch","towel","umbrella","wallet","waterfall"],
+    b1: ["advertisement","alarm clock","ambulance","audience","battery","cartoon","challenge","charity",
+         "costume","crowd","decoration","documentary","engine","exhibition","firework","fountain","gadget",
+         "headline","hero","instrument","journey","lighthouse","magazine","mirror","mystery","neighbour",
+         "opportunity","painting","password","planet","podcast","recipe","rumour","scarf","secret",
+         "souvenir","storm","stranger","subtitles","sunglasses","timetable","tournament","traffic",
+         "trophy","volunteer","wildlife"],
+    b2: ["ambition","architecture","atmosphere","awareness","campaign","celebrity","compromise",
+         "curiosity","deadline","dilemma","drone","empathy","experiment","fame","gap year","generation",
+         "habit","heritage","imagination","influencer","inspiration","landscape","legacy","masterpiece",
+         "nostalgia","obstacle","patience","pollution","privacy","procrastination","reputation","routine",
+         "satellite","sculpture","skyscraper","streaming","sustainability","talent","teamwork",
+         "tradition","trend","virtual reality","wisdom"]
+  };
+
+  const $ = id => document.getElementById(id);
+  const val = name => document.querySelector(`input[name="${name}"]:checked`).value;
+
+  const decks = {};
+  function drawWord(lv) {
+    if (!decks[lv] || !decks[lv].length) decks[lv] = WORDS[lv].slice().sort(() => Math.random() - 0.5);
+    return decks[lv].pop();
+  }
+
+  /* Build the chart */
+  const chart = $("chart");
+  const colHeads = [], rowHeads = [], cells = [];
+  const el = (cls, text) => { const e = document.createElement("div"); e.className = cls; if (text) e.textContent = text; return e; };
+  chart.appendChild(el("head"));
+  AUX.forEach(a => { const h = el("head col", a.replace(/ \/ /g, "/\n")); chart.appendChild(h); colHeads.push(h); });
+  /* Each square is numbered within its colour, counting along the rows: Blue 1, Blue 2… */
+  const zoneCount = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  QW.forEach((q, r) => {
+    const h = el("head rowh", q); chart.appendChild(h); rowHeads.push(h);
+    AUX.forEach((a, c) => {
+      const z = zoneOf(r, c);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "cell " + ZONES[z].cls;
+      b.dataset.r = r; b.dataset.c = c; b.dataset.z = z;
+      b.dataset.name = String(++zoneCount[z]);
+      b.addEventListener("click", () => reveal(b));
+      chart.appendChild(b);
+      cells.push(b);
+    });
+  });
+
+  function blank(b) {
+    b.classList.remove("shown", "current");
+    b.innerHTML = `<span class="num">${b.dataset.name}</span>`;
+    b.setAttribute("aria-label", `${ZONES[b.dataset.z].colour} ${b.dataset.name}: ${QW[b.dataset.r]} + ${AUX[b.dataset.c]}`);
+  }
+
+  function reveal(b) {
+    const word = drawWord(ZONES[b.dataset.z].lv);
+    cells.forEach(x => x.classList.remove("current"));
+    b.innerHTML = `<span class="tag">${b.dataset.name}</span>${word}`;
+    b.classList.add("shown", "current");
+    b.setAttribute("aria-label", `${ZONES[b.dataset.z].colour} ${b.dataset.name}, ${QW[b.dataset.r]} + ${AUX[b.dataset.c]}: ${word}`);
+    colHeads.forEach((h, i) => h.classList.toggle("on", i === +b.dataset.c));
+    rowHeads.forEach((h, i) => h.classList.toggle("on", i === +b.dataset.r));
+  }
+
+  function clearChart() {
+    cells.forEach(blank);
+    colHeads.concat(rowHeads).forEach(h => h.classList.remove("on"));
+  }
+
+  function applyLevel() {
+    const upTo = +val("level");
+    cells.forEach(b => { b.disabled = +b.dataset.z > upTo; });
+    document.querySelectorAll("#key span").forEach(s => s.classList.toggle("off", +s.dataset.z > upTo));
+    clearChart();
+  }
+
+  $("clear").addEventListener("click", clearChart);
+  document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", applyLevel));
+  applyLevel();
+})();
+</script>
+</body>
+</html>
