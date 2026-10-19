@@ -12,255 +12,382 @@
     --mist: #EDF3F2;
     --ink: #10303A;
     --ink-soft: #456670;
+    --line: #5F808A;
+    --sea: #17677A;
+    --sea-deep: #124F5E;
     --focus: #0B62A4;
     --panel: #F9FBFB;
-    --line: rgba(16, 48, 58, 0.14);
-    /* Zones, after the original chart's blue, yellow, green and brown */
-    --facts: #A9CCEB;    /* blue: ask for facts */
-    --reasons: #F2D9A6;  /* yellow: ask for reasons */
-    --imagine: #C7DE9F;  /* green: imagine and predict */
-    --ideas: #D9B48F;    /* brown: opinions and ideas */
+    /* Level colours, as in Word Lab */
+    --a1: #F2D9A6;
+    --a2: #F4B5A0;
+    --b1: #A9CCEB;
+    --b2: #A8D5CB;
+    /* The three columns */
+    --c1: #A9CCEB;
+    --c2: #F2D9A6;
+    --c3: #C7DE9F;
     --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
-    box-sizing: border-box;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--mist);
+    color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  *, *::before, *::after { box-sizing: border-box; }
-  html { height: 100%; }
-  body {
-    margin: 0; min-height: 100%;
-    background: var(--mist); color: var(--ink);
-    font-family: var(--font);
-    -webkit-text-size-adjust: 100%;
-  }
-  main {
-    max-width: 1100px; margin: 0 auto;
-    padding: clamp(1rem, 3vw, 2rem);
-    display: flex; flex-direction: column; gap: 0.8rem;
-  }
   button { font-family: var(--font); color: var(--ink); }
-  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
 
-  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.25rem);
+  }
+
+  /* ---------- Title, level tabs and the way back (as on All About You) ---------- */
+  .top { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: clamp(1rem, 2.5vw, 2rem); }
+  .top h1 { margin: 0 0 0.6rem; font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .back { margin: 0 0 0.75rem auto; color: var(--ink-soft); font-size: 0.9rem; text-decoration: none; white-space: nowrap; }
   .back:hover { text-decoration: underline; }
   .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
-  .hint { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 1.05rem; }
+  .tabs { display: flex; gap: 0.2rem; }
+  .tabs label { position: relative; display: block; }
+  .tabs input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .tabs span {
+    display: flex; align-items: center; gap: 0.45rem;
+    height: 2.75rem; padding: 0 1.15rem; border-radius: 0.7rem 0.7rem 0 0;
+    color: var(--ink-soft); font-size: 1rem; font-weight: 700; white-space: nowrap;
+  }
+  .tabs span::before { content: ""; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--lv); }
+  .tabs input:hover + span { background: rgba(255, 255, 255, 0.55); color: var(--ink); }
+  .tabs input:checked + span { background: var(--panel); color: var(--ink); }
+  .tabs input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: -3px; }
 
-  /* Pickers */
-  .row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; align-items: center; }
-  fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  legend { float: left; margin-right: 8px; color: var(--ink-soft); font-size: 0.95rem; }
-  .seg { position: relative; }
-  .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .seg span {
-    display: inline-block; padding: 8px 15px; border-radius: 999px;
-    border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 1rem;
-  }
-  .seg input:checked + span { background: var(--ink); color: var(--mist); border-color: var(--ink); }
-  .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+  /* ---------- The frame everything sits on ---------- */
+  .frame { display: flex; flex-direction: column; gap: 0.9rem; background: var(--panel); border-radius: 0.9rem; padding: clamp(0.8rem, 2vw, 1.4rem); }
+  .source { margin: 0; color: var(--ink-soft); font-size: 1rem; }
 
-  /* The chart fills the width now */
-  .chart {
-    display: grid; grid-template-columns: minmax(4.4rem, auto) repeat(6, minmax(0, 1fr));
-    gap: 6px;
+  /* ---------- The three columns ---------- */
+  .stage {
+    --gap: clamp(0.6rem, 1.6vw, 1.1rem);
+    --h: clamp(14rem, calc(100vh - 21rem), 32rem);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gap);
   }
-  .head {
-    display: grid; place-items: center; text-align: center;
-    font-weight: 700; font-size: clamp(0.85rem, 1.7vw, 1.15rem); line-height: 1.1;
-    padding: 0.35rem 0.2rem; border-radius: 0.6rem;
-    transition: background-color 150ms ease, color 150ms ease;
+  @supports (height: 100svh) {
+    .stage { --h: clamp(14rem, calc(100svh - 21rem), 32rem); }
   }
-  .head.col { align-self: end; white-space: pre-line; }
-  .head.rowh { justify-items: start; padding-left: 0.5rem; font-size: clamp(0.95rem, 2vw, 1.3rem); }
-  .head.on { background: var(--ink); color: var(--mist); }
-  .cell {
-    border: 0; border-radius: 0.7rem; cursor: pointer;
-    min-height: clamp(44px, 7.2vh, 72px);
-    padding: 0.3rem;
-    font-size: clamp(0.85rem, 1.7vw, 1.15rem); font-weight: 700; line-height: 1.1;
-    overflow-wrap: anywhere; hyphens: auto;
-    transition: transform 120ms ease;
-  }
-  .cell.facts { background: var(--facts); }
-  .cell.reasons { background: var(--reasons); }
-  .cell.imagine { background: var(--imagine); }
-  .cell.ideas { background: var(--ideas); }
-  .cell { position: relative; }
-  .cell .num { opacity: 0.6; font-size: 1.05em; }
-  .cell .tag { position: absolute; top: 0.3rem; left: 0.45rem; font-size: 0.68rem; font-weight: 700; opacity: 0.6; }
-  .cell.shown { font-weight: 800; }
-  .cell:hover:not(:disabled) { filter: brightness(0.96); }
-  .cell:disabled { background: var(--panel); color: transparent; border: 2px dashed var(--line); cursor: default; }
-  .cell.current { background: var(--ink); color: var(--mist); transform: scale(1.04); }
 
-  .below { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem 1.4rem; flex-wrap: wrap; }
-  .key b { color: var(--ink); }
-  .key { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.95rem; color: var(--ink-soft); }
-  .key span::before {
-    content: ""; display: inline-block; vertical-align: -0.12em;
-    width: 1em; height: 1em; border-radius: 0.3em; margin-right: 0.35em;
-    background: var(--k);
+  .col {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-width: 0;
+    height: var(--h);
+    padding: clamp(1rem, 2.4vw, 2rem);
+    border: 0;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: var(--c);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
   }
-  .key .off { opacity: 0.35; }
-  .clear {
-    border: 1px solid var(--line); background: var(--panel); cursor: pointer; border-radius: 0.8rem;
-    font-size: 1rem; font-weight: 700; padding: 8px 18px;
+  .col:hover { filter: brightness(0.96); }
+  .col:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+  .tag {
+    position: absolute; top: 1.1rem; left: 1.3rem;
+    font-size: 0.9rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    opacity: 0.5;
   }
-  .clear:hover { background: #fff; }
+  .swap {
+    position: absolute; top: 1.1rem; right: 1.3rem;
+    font-size: 0.9rem; font-weight: 600;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .col:hover .swap, .col:focus-visible .swap { opacity: 0.7; }
 
-  footer { color: var(--ink-soft); font-size: 0.85rem; }
-  footer a { color: inherit; }
+  /* Sized by the script so the longest word still fits */
+  .text {
+    display: block;
+    width: 100%;
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+  .col.spinning .text { opacity: 0.55; }
 
+  @keyframes settle { from { opacity: 0.4; transform: translateY(0.35rem); } to { opacity: 1; transform: none; } }
+  .text.fresh { animation: settle 0.22s ease-out; }
+
+  /* ---------- Spin all ---------- */
+  .spin {
+    width: 100%; height: 3.25rem; padding: 0 1.6rem;
+    border: 0; border-radius: 0.6rem;
+    background: var(--sea); color: #fff;
+    font-size: 1.2rem; font-weight: 700; cursor: pointer;
+  }
+  .spin:hover { background: var(--sea-deep); }
+  .spin:active { transform: translateY(1px); }
+  .spin:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  .hint { margin: 0.2rem 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (max-width: 720px) {
+    .stage { grid-template-columns: 1fr; --h: clamp(7rem, calc((100svh - 22rem) / 3), 12rem); }
+    .swap { display: none; }
+  }
+  @media (max-width: 640px) {
+    .tabs { order: 3; flex-basis: 100%; }
+    .tabs span { padding: 0 0.9rem; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .cell, .head { transition: none; }
-    .cell.current { transform: none; }
+    .text.fresh { animation: none; }
+    .swap { transition: none; }
   }
 </style>
 </head>
 <body>
-<main>
-  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
-
-  <header>
+<main class="page">
+  <div class="top">
     <h1>The Question Creator</h1>
-    <p class="hint">Tap a square. Make a question that starts with those two words and uses the word in the square.</p>
-  </header>
-
-  <div class="row">
-    <fieldset>
-      <legend>Level</legend>
-      <label class="seg"><input type="radio" name="level" value="1"><span>A1</span></label>
-      <label class="seg"><input type="radio" name="level" value="2" checked><span>A2</span></label>
-      <label class="seg"><input type="radio" name="level" value="3"><span>B1</span></label>
-      <label class="seg"><input type="radio" name="level" value="4"><span>B2</span></label>
-    </fieldset>
-  </div>
-
-  <div class="chart" id="chart" aria-label="Question chart. Tap a square to show a word."></div>
-
-  <div class="below">
-    <div class="key" id="key">
-      <span style="--k: var(--facts)" data-z="1"><b>Blue</b> facts, A1 words</span>
-      <span style="--k: var(--reasons)" data-z="2"><b>Yellow</b> reasons, A2 words</span>
-      <span style="--k: var(--imagine)" data-z="3"><b>Green</b> imagine and predict, B1 words</span>
-      <span style="--k: var(--ideas)" data-z="4"><b>Brown</b> opinions and ideas, B2 words</span>
+    <div class="tabs" role="radiogroup" aria-label="Level">
+      <label style="--lv: var(--a1)"><input type="radio" name="level" value="1"><span>A1</span></label>
+      <label style="--lv: var(--a2)"><input type="radio" name="level" value="2" checked><span>A2</span></label>
+      <label style="--lv: var(--b1)"><input type="radio" name="level" value="3"><span>B1</span></label>
+      <label style="--lv: var(--b2)"><input type="radio" name="level" value="4"><span>B2</span></label>
     </div>
-    <button class="clear" type="button" id="clear">Clear the chart</button>
+    <a class="back" href="./">&larr; Question Time</a>
   </div>
 
-  <footer>Based on the question chart from <a href="https://onthesamepageelt.wordpress.com/2017/08/31/question-charts/">On the same page ELT</a>, shared under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>. Tap a square again for a new word.</footer>
+  <div class="frame">
+    <p class="source">Make a question that starts with the first two and uses the word.</p>
+
+    <div class="stage">
+      <button type="button" class="col" id="col-q" style="--c: var(--c1)" aria-label="Spin the question word">
+        <span class="tag" aria-hidden="true">Question word</span>
+        <span class="swap" aria-hidden="true">Spin</span>
+        <span class="text" id="text-q"></span>
+      </button>
+      <button type="button" class="col" id="col-v" style="--c: var(--c2)" aria-label="Spin the verb">
+        <span class="tag" aria-hidden="true">Verb</span>
+        <span class="swap" aria-hidden="true">Spin</span>
+        <span class="text" id="text-v"></span>
+      </button>
+      <button type="button" class="col" id="col-w" style="--c: var(--c3)" aria-label="Spin the word">
+        <span class="tag" aria-hidden="true">Word</span>
+        <span class="swap" aria-hidden="true">Spin</span>
+        <span class="text" id="text-w"></span>
+      </button>
+    </div>
+
+    <button type="button" class="spin" id="spin-all">Spin all three</button>
+
+    <p class="hint">Tap a column to spin just that one, or press 1, 2 or 3. Space spins all three.</p>
+  </div>
+  <p class="sr" role="status" id="status"></p>
 </main>
 
 <script>
 (function () {
+  /* ---------------------------------------------------------------
+     Column 1 and column 2. Which pairs can come up depends on the level:
+       A1  facts:      What, Who, Where, When  +  is, are, do, does, did, can
+       A2  + reasons:  How and Why join in (still with those verbs)
+       B1  + imagine:  would, will, might, could join, with What, Who, Where, When
+       B2  everything: How and Why with would, will, might, could too
+  ---------------------------------------------------------------- */
   const QW = ["What", "Who", "Where", "When", "How", "Why"];
-  const AUX = ["is / are", "do / does / did", "can", "would", "will", "might / could"];
+  const VERBS = ["is", "are", "do", "does", "did", "can", "would", "will", "might", "could"];
+  const LATER = ["would", "will", "might", "could"];   // the verbs that join at B1
 
-  /* Zones, as in the original chart. Each colour is numbered 1 to 4 and draws its word from one level. */
-  const ZONES = {
-    1: { cls: "facts",   lv: "a1", colour: "Blue" },
-    2: { cls: "reasons", lv: "a2", colour: "Yellow" },
-    3: { cls: "imagine", lv: "b1", colour: "Green" },
-    4: { cls: "ideas",   lv: "b2", colour: "Brown" }
-  };
-  function zoneOf(r, c) {
-    const modal = c >= 3, howWhy = r >= 4;
+  function stepOf(q, v) {
+    const modal = LATER.includes(VERBS[v]), howWhy = q >= 4;
     if (!modal && !howWhy) return 1;
     if (!modal && howWhy) return 2;
     if (modal && !howWhy) return 3;
     return 4;
   }
+  const allowed = (q, v) => stepOf(q, v) <= level;
 
-  /* Words by level (concrete, teen-friendly) */
+  /* Column 3: words by level (concrete, teen-friendly). Add or remove freely. */
   const WORDS = {
-    a1: ["apple","ball","bike","bird","book","bus","cake","cat","chair","chocolate","computer","dog",
-         "door","duck","egg","fish","flower","football","garden","guitar","hat","horse","ice cream",
-         "kite","lemon","monkey","moon","orange","park","pencil","phone","pizza","rabbit","rain",
-         "robot","sandwich","sea","shoe","snake","snow","sun","table","tree","TV","water","window","zoo"],
-    a2: ["airport","backpack","beach","birthday","blanket","bridge","camera","castle","cinema","cloud",
-         "competition","concert","desert","dictionary","festival","forest","fridge","gift","headphones",
-         "helmet","homework","island","jacket","kitchen","ladder","laptop","library","map","market",
-         "mountain","museum","passport","piano","pillow","postcard","river","skateboard","sofa",
-         "stadium","suitcase","swimming pool","tent","ticket","torch","towel","umbrella","wallet","waterfall"],
-    b1: ["advertisement","alarm clock","ambulance","audience","battery","cartoon","challenge","charity",
-         "costume","crowd","decoration","documentary","engine","exhibition","firework","fountain","gadget",
-         "headline","hero","instrument","journey","lighthouse","magazine","mirror","mystery","neighbour",
-         "opportunity","painting","password","planet","podcast","recipe","rumour","scarf","secret",
-         "souvenir","storm","stranger","subtitles","sunglasses","timetable","tournament","traffic",
-         "trophy","volunteer","wildlife"],
-    b2: ["ambition","architecture","atmosphere","awareness","campaign","celebrity","compromise",
-         "curiosity","deadline","dilemma","drone","empathy","experiment","fame","gap year","generation",
-         "habit","heritage","imagination","influencer","inspiration","landscape","legacy","masterpiece",
-         "nostalgia","obstacle","patience","pollution","privacy","procrastination","reputation","routine",
-         "satellite","sculpture","skyscraper","streaming","sustainability","talent","teamwork",
-         "tradition","trend","virtual reality","wisdom"]
+    1: ["apple","ball","bike","bird","book","bus","cake","cat","chair","chocolate","computer","dog",
+        "door","duck","egg","fish","flower","football","garden","guitar","hat","horse","ice cream",
+        "kite","lemon","monkey","moon","orange","park","pencil","phone","pizza","rabbit","rain",
+        "robot","sandwich","sea","shoe","snake","snow","sun","table","tree","TV","water","window","zoo"],
+    2: ["airport","backpack","beach","birthday","blanket","bridge","camera","castle","cinema","cloud",
+        "competition","concert","desert","dictionary","festival","forest","fridge","gift","headphones",
+        "helmet","homework","island","jacket","kitchen","ladder","laptop","library","map","market",
+        "mountain","museum","passport","piano","pillow","postcard","river","skateboard","sofa",
+        "stadium","suitcase","swimming pool","tent","ticket","torch","towel","umbrella","wallet","waterfall"],
+    3: ["advertisement","alarm clock","ambulance","audience","battery","cartoon","challenge","charity",
+        "costume","crowd","decoration","documentary","engine","exhibition","firework","fountain","gadget",
+        "headline","hero","instrument","journey","lighthouse","magazine","mirror","mystery","neighbour",
+        "opportunity","painting","password","planet","podcast","recipe","rumour","scarf","secret",
+        "souvenir","storm","stranger","subtitles","sunglasses","timetable","tournament","traffic",
+        "trophy","volunteer","wildlife"],
+    4: ["ambition","architecture","atmosphere","awareness","campaign","celebrity","compromise",
+        "curiosity","deadline","dilemma","drone","empathy","experiment","fame","gap year","generation",
+        "habit","heritage","imagination","influencer","inspiration","landscape","legacy","masterpiece",
+        "nostalgia","obstacle","patience","pollution","privacy","procrastination","reputation","routine",
+        "satellite","sculpture","skyscraper","streaming","sustainability","talent","teamwork",
+        "tradition","trend","virtual reality","wisdom"]
   };
 
   const $ = id => document.getElementById(id);
-  const val = name => document.querySelector(`input[name="${name}"]:checked`).value;
+  const cols = { q: $("col-q"), v: $("col-v"), w: $("col-w") };
+  const texts = { q: $("text-q"), v: $("text-v"), w: $("text-w") };
+  const statusEl = $("status");
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  let level = 2;
+  let q = 0, v = 0, word = "";
+  const busy = { q: false, v: false, w: false };
+
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+  const pick = list => list[Math.floor(Math.random() * list.length)];
+
+  /* Words come from a shuffled deck per level, so none repeats until all have come up */
   const decks = {};
-  function drawWord(lv) {
-    if (!decks[lv] || !decks[lv].length) decks[lv] = WORDS[lv].slice().sort(() => Math.random() - 0.5);
-    return decks[lv].pop();
+  function drawWord() {
+    if (!decks[level] || !decks[level].length) decks[level] = shuffle(WORDS[level].slice());
+    let w = decks[level].pop();
+    if (w === word && decks[level].length) w = decks[level].pop();
+    return w;
   }
 
-  /* Build the chart */
-  const chart = $("chart");
-  const colHeads = [], rowHeads = [], cells = [];
-  const el = (cls, text) => { const e = document.createElement("div"); e.className = cls; if (text) e.textContent = text; return e; };
-  chart.appendChild(el("head"));
-  AUX.forEach(a => { const h = el("head col", a.replace(/ \/ /g, "/\n")); chart.appendChild(h); colHeads.push(h); });
-  /* Each square is numbered within its colour, counting along the rows: Blue 1, Blue 2… */
-  const zoneCount = { 1: 0, 2: 0, 3: 0, 4: 0 };
-  QW.forEach((q, r) => {
-    const h = el("head rowh", q); chart.appendChild(h); rowHeads.push(h);
-    AUX.forEach((a, c) => {
-      const z = zoneOf(r, c);
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "cell " + ZONES[z].cls;
-      b.dataset.r = r; b.dataset.c = c; b.dataset.z = z;
-      b.dataset.name = String(++zoneCount[z]);
-      b.addEventListener("click", () => reveal(b));
-      chart.appendChild(b);
-      cells.push(b);
-    });
+  /* Choices for one column that still make an allowed pair with the other, avoiding a repeat */
+  function qChoices() { const all = QW.map((_, i) => i).filter(i => allowed(i, v)); const f = all.filter(i => i !== q); return f.length ? f : all; }
+  function vChoices() { const all = VERBS.map((_, i) => i).filter(i => allowed(q, i)); const f = all.filter(i => i !== v); return f.length ? f : all; }
+
+  /* ---------- Showing text, sized to fit ---------- */
+  function fit(key) {
+    const col = cols[key], el = texts[key];
+    const style = getComputedStyle(col);
+    const innerW = col.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const innerH = col.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 32;
+    if (innerW <= 0) return;
+    let size = Math.max(22, Math.min(innerH * 0.42, innerW * 0.3, 120));
+    el.style.fontSize = size + "px";
+    let guard = 0;
+    while (guard++ < 50 && size > 18 && (el.scrollWidth > innerW + 1 || el.scrollHeight > innerH + 1)) {
+      size *= 0.94;
+      el.style.fontSize = size + "px";
+    }
+  }
+  /* The three columns share one size so they read as a single line, unless a long word needs smaller */
+  function fitAll() {
+    ["q", "v", "w"].forEach(fit);
+    const sizes = ["q", "v", "w"].map(k => parseFloat(texts[k].style.fontSize) || 0);
+    const shared = Math.min(...sizes);
+    ["q", "v", "w"].forEach(k => { texts[k].style.fontSize = shared + "px"; });
+  }
+
+  function setText(key, value, settle) {
+    texts[key].textContent = value;
+    if (settle) {
+      texts[key].classList.remove("fresh"); void texts[key].offsetWidth; texts[key].classList.add("fresh");
+    }
+  }
+
+  function announce() {
+    statusEl.textContent = QW[q] + ", " + VERBS[v] + ", " + word;
+  }
+
+  /* ---------- Spinning: a quick flicker through the options, then it lands ---------- */
+  function spin(key, finalValue, display, pool, duration) {
+    if (reduceMotion || duration === 0) {
+      setText(key, display(finalValue), true);
+      fitAll();
+      return;
+    }
+    busy[key] = true;
+    cols[key].classList.add("spinning");
+    const start = performance.now();
+    let lastSwap = 0;
+    function tick(now) {
+      if (now - start < duration) {
+        if (now - lastSwap > 70) { setText(key, display(pick(pool)), false); lastSwap = now; }
+        requestAnimationFrame(tick);
+      } else {
+        cols[key].classList.remove("spinning");
+        setText(key, display(finalValue), true);
+        busy[key] = false;
+        fitAll();
+        announce();
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const showQ = i => QW[i];
+  const showV = i => VERBS[i];
+  const showW = w => w;
+
+  function spinQ(d = 450) { if (busy.q) return; const pool = qChoices(); q = pick(pool); spin("q", q, showQ, pool, d); }
+  function spinV(d = 450) { if (busy.v) return; const pool = vChoices(); v = pick(pool); spin("v", v, showV, pool, d); }
+  function spinW(d = 450) { if (busy.w) return; word = drawWord(); spin("w", word, showW, WORDS[level], d); }
+
+  /* All three: pick a fresh allowed pair, then the word, landing one after another */
+  function spinAll(animate = true) {
+    if (busy.q || busy.v || busy.w) return;
+    const pairs = [];
+    QW.forEach((_, i) => VERBS.forEach((_, j) => { if (allowed(i, j) && !(i === q && j === v)) pairs.push([i, j]); }));
+    const [nq, nv] = pick(pairs);
+    const qPool = QW.map((_, i) => i), vPool = VERBS.map((_, i) => i).filter(j => VERBS[j]);
+    q = nq; v = nv; word = drawWord();
+    spin("q", q, showQ, qPool.filter(i => VERBS.some((_, j) => allowed(i, j))), animate ? 420 : 0);
+    spin("v", v, showV, vPool.filter(j => allowed(0, j)), animate ? 600 : 0);
+    spin("w", word, showW, WORDS[level], animate ? 780 : 0);
+    if (!animate) announce();
+  }
+
+  cols.q.addEventListener("click", () => spinQ());
+  cols.v.addEventListener("click", () => spinV());
+  cols.w.addEventListener("click", () => spinW());
+  $("spin-all").addEventListener("click", () => spinAll());
+
+  document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", () => {
+    level = +r.value;
+    spinAll();
+  }));
+
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest && e.target.closest("a, button")) return;   // a focused link or button acts as normal
+    if (e.code === "Space" || e.key === "Enter") { e.preventDefault(); spinAll(); }
+    else if (e.key === "1") spinQ();
+    else if (e.key === "2") spinV();
+    else if (e.key === "3") spinW();
   });
 
-  function blank(b) {
-    b.classList.remove("shown", "current");
-    b.innerHTML = `<span class="num">${b.dataset.name}</span>`;
-    b.setAttribute("aria-label", `${ZONES[b.dataset.z].colour} ${b.dataset.name}: ${QW[b.dataset.r]} + ${AUX[b.dataset.c]}`);
-  }
+  let frame;
+  window.addEventListener("resize", () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(fitAll); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
 
-  function reveal(b) {
-    const word = drawWord(ZONES[b.dataset.z].lv);
-    cells.forEach(x => x.classList.remove("current"));
-    b.innerHTML = `<span class="tag">${b.dataset.name}</span>${word}`;
-    b.classList.add("shown", "current");
-    b.setAttribute("aria-label", `${ZONES[b.dataset.z].colour} ${b.dataset.name}, ${QW[b.dataset.r]} + ${AUX[b.dataset.c]}: ${word}`);
-    colHeads.forEach((h, i) => h.classList.toggle("on", i === +b.dataset.c));
-    rowHeads.forEach((h, i) => h.classList.toggle("on", i === +b.dataset.r));
-  }
-
-  function clearChart() {
-    cells.forEach(blank);
-    colHeads.concat(rowHeads).forEach(h => h.classList.remove("on"));
-  }
-
-  function applyLevel() {
-    const upTo = +val("level");
-    cells.forEach(b => { b.disabled = +b.dataset.z > upTo; });
-    document.querySelectorAll("#key span").forEach(s => s.classList.toggle("off", +s.dataset.z > upTo));
-    clearChart();
-  }
-
-  $("clear").addEventListener("click", clearChart);
-  document.querySelectorAll('input[name="level"]').forEach(r => r.addEventListener("change", applyLevel));
-  applyLevel();
+  level = +document.querySelector('input[name="level"]:checked').value;
+  q = 0; v = 0;
+  spinAll(false);
 })();
 </script>
 </body>
