@@ -12,197 +12,254 @@
     --mist: #EDF3F2;
     --ink: #10303A;
     --ink-soft: #456670;
+    --line: #5F808A;
+    --sea: #17677A;
+    --sea-deep: #124F5E;
     --focus: #0B62A4;
     --panel: #F9FBFB;
-    --line: rgba(16, 48, 58, 0.14);
     --teal: #A8D5CB;
     --sand: #F2D9A6;
     --coral: #F4B5A0;
-    --lilac: #C9C3EA;
     --sky: #A9CCEB;
-    --rose: #F0C2D3;
-    --leaf: #C7DE9F;
     --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
-    box-sizing: border-box;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--mist);
+    color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  *, *::before, *::after { box-sizing: border-box; }
-  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
-  body {
-    margin: 0; min-height: 100%;
-    background: var(--mist); color: var(--ink);
-    font-family: var(--font);
-    -webkit-text-size-adjust: 100%;
-    display: flex; flex-direction: column; align-items: center;
+  button, input { font-family: var(--font); color: var(--ink); }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.25rem);
   }
-  main {
-    width: 100%; max-width: 1100px; padding: 14px 24px 24px;
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+
+  /* ---------- Title and the way back (as on the other pages) ---------- */
+  .top { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: clamp(1rem, 2.5vw, 2rem); }
+  .top h1 { margin: 0 0 0.6rem; font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .back { margin: 0 0 0.75rem auto; color: var(--ink-soft); font-size: 0.9rem; text-decoration: none; white-space: nowrap; }
   .back:hover { text-decoration: underline; }
   .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; margin: 0; letter-spacing: -0.02em; line-height: 1.05; }
 
-  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .steps li {
-    background: var(--leaf); border-radius: 0.9rem;
-    padding: 8px 14px; font-size: 1.05rem; line-height: 1.35; font-weight: 600;
+  /* The levels are the tabs, each with a small dot in its level colour */
+  .tabs { display: flex; gap: 0.2rem; }
+  .tabs label { position: relative; display: block; }
+  .tabs input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .tabs span {
+    display: flex; align-items: center; gap: 0.45rem;
+    height: 2.75rem; padding: 0 1.15rem; border-radius: 0.7rem 0.7rem 0 0;
+    color: var(--ink-soft); font-size: 1rem; font-weight: 700; white-space: nowrap;
   }
-  .steps b { display: block; font-size: 1.15rem; }
+  .tabs span::before { content: ""; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--lv); }
+  .tabs input:hover + span { background: rgba(255, 255, 255, 0.55); color: var(--ink); }
+  .tabs input:checked + span { background: var(--panel); color: var(--ink); }
+  .tabs input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: -3px; }
 
-  /* Stage 1: words */
-  .prompts {
-    list-style: none; margin: 0; padding: 0;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;
-    counter-reset: n;
-  }
-  .prompts li {
-    counter-increment: n;
-    display: grid; grid-template-columns: 2.2rem 1fr; gap: 2px 10px; align-items: center;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 0.9rem;
-    padding: 8px 12px;
-  }
-  .prompts li::before {
-    content: counter(n);
-    grid-row: span 2;
-    width: 2.2rem; height: 2.2rem; border-radius: 50%;
-    display: grid; place-items: center;
-    background: var(--c); font-weight: 800; font-size: 1.05rem;
-  }
-  .prompts label { font-size: 1rem; color: var(--ink-soft); font-weight: 600; }
-  .pair { display: flex; gap: 8px; }
-  .prompts input {
-    width: 100%; min-width: 0;
-    font: inherit; font-size: 1.25rem; font-weight: 700; color: var(--ink);
-    padding: 6px 10px; border-radius: 0.6rem;
-    border: 2px solid var(--line); background: #fff;
-  }
-  .prompts input::placeholder { color: #9AB0B6; font-weight: 500; }
-  .prompts input:focus { outline: none; border-color: var(--focus); }
+  /* ---------- The frame everything sits on ---------- */
+  .frame { display: flex; flex-direction: column; gap: 0.9rem; background: var(--panel); border-radius: 0.9rem; padding: clamp(0.8rem, 2vw, 1.4rem); }
+  .source { margin: 0; color: var(--ink-soft); font-size: 1rem; }
 
-  /* Stage 2: questions */
-  .questions {
-    list-style: none; margin: 0; padding: 0;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;
-    counter-reset: q;
+  /* ---------- Three cards: a prompt and its word, then the question ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.6rem, 1.6vw, 1.1rem);
   }
-  .questions li {
-    counter-increment: q;
-    display: grid; grid-template-columns: 2.4rem 1fr; gap: 12px; align-items: center;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 0.9rem;
-    padding: 12px 14px;
-    font-size: clamp(1.2rem, 2.1vw, 1.7rem); font-weight: 600; line-height: 1.3;
-    animation: rise 320ms ease-out both;
-    animation-delay: calc(var(--i) * 70ms);
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.9rem;
+    min-width: 0;
+    min-height: clamp(15rem, calc(100vh - 21rem), 30rem);
+    padding: clamp(1rem, 2.4vw, 1.8rem);
+    border-radius: 0.9rem;
+    background: var(--c);
   }
-  .questions li::before {
-    content: counter(q);
+  @supports (height: 100svh) {
+    .card { min-height: clamp(15rem, calc(100svh - 21rem), 30rem); }
+  }
+  .card:nth-child(1) { --c: var(--teal); }
+  .card:nth-child(2) { --c: var(--sand); }
+  .card:nth-child(3) { --c: var(--coral); }
+
+  .num {
+    position: absolute; top: 1rem; left: 1.2rem;
     width: 2.4rem; height: 2.4rem; border-radius: 50%;
     display: grid; place-items: center;
-    background: var(--c); font-weight: 800; font-size: 1.1rem;
+    background: var(--panel); font-weight: 800; font-size: 1.1rem;
   }
-  .questions mark {
-    background: var(--c); color: var(--ink);
+
+  .prompt {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.6vw, 2.3rem);
+    font-weight: 700; line-height: 1.15; letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .inputs { display: flex; gap: 0.5rem; }
+  .inputs input {
+    width: 100%; min-width: 0;
+    height: 3.4rem; padding: 0 0.9rem;
+    border: 2px solid rgba(16, 48, 58, 0.25); border-radius: 0.6rem;
+    background: #fff;
+    font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 700;
+  }
+  .inputs input::placeholder { color: #9AB0B6; font-weight: 500; }
+  .inputs input:hover { border-color: var(--ink); }
+  .inputs input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+
+  .question {
+    margin: 0;
+    font-size: clamp(1.6rem, 2.9vw, 2.6rem);
+    font-weight: 700; line-height: 1.2; letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .question mark {
+    background: var(--panel); color: var(--ink);
     padding: 0 0.3em; border-radius: 0.35em; font-weight: 800;
     box-decoration-break: clone; -webkit-box-decoration-break: clone;
   }
-  .questions mark.guess { background: transparent; box-shadow: inset 0 -0.18em 0 var(--c); color: var(--ink-soft); }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  /* A word nobody typed, so the example was used */
+  .question mark.guess { background: transparent; box-shadow: inset 0 -0.16em 0 var(--panel); color: var(--ink-soft); }
 
-  .li-1 { --c: var(--teal); }  .li-2 { --c: var(--sand); }  .li-3 { --c: var(--coral); }
-  .li-4 { --c: var(--lilac); } .li-5 { --c: var(--sky); }   .li-6 { --c: var(--rose); }
-  .li-7 { --c: var(--leaf); }  .li-8 { --c: var(--teal); }  .li-9 { --c: var(--sand); }
-  .li-10 { --c: var(--coral); }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .question { animation: rise 320ms ease-out both; animation-delay: calc(var(--i) * 120ms); }
 
-  .controls { display: flex; gap: 12px; flex-wrap: wrap; }
-  button {
-    font: inherit; font-weight: 800; cursor: pointer; color: var(--ink);
-    border: 0; border-radius: 0.9rem;
+  /* ---------- Buttons ---------- */
+  .buttons { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .btn {
+    height: 3.25rem; padding: 0 1.4rem;
+    border: 0; border-radius: 0.6rem;
+    font-size: 1.15rem; font-weight: 700; cursor: pointer; white-space: nowrap;
   }
-  button:hover { filter: brightness(0.96); }
-  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
-  .primary { background: var(--teal); font-size: 1.4rem; padding: 12px 28px; min-height: 58px; flex: 1; }
-  .secondary { background: var(--panel); border: 1px solid var(--line); font-size: 1.05rem; padding: 10px 18px; font-weight: 700; }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .primary { flex: 1 1 12rem; background: var(--sea); color: #fff; font-size: 1.25rem; }
+  .primary:hover { background: var(--sea-deep); }
+  .secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); }
+  .secondary:hover { box-shadow: inset 0 0 0 2px var(--ink); }
 
-  [hidden] { display: none !important; }
+  .hint { margin: 0.2rem 0 0; color: var(--ink-soft); font-size: 0.95rem; }
 
-  /* Fit everything on one screen when projected */
-  @media (min-width: 761px) {
-    html, body { height: 100%; }
-    body { overflow: hidden; }
-    main { height: 100%; padding: 1.2vh 24px 1.8vh; gap: 1.4vh; }
-    h1 { font-size: clamp(1.6rem, 4.6vh, 2.6rem); }
-    .back { font-size: clamp(0.8rem, 1.8vh, 0.95rem); }
-    .steps li { padding: 0.8vh 14px; font-size: clamp(0.9rem, 2.1vh, 1.1rem); }
-    .steps b { font-size: clamp(1rem, 2.3vh, 1.2rem); }
-    #wordsStage, #questionsStage { flex: 1; min-height: 0; display: flex; }
-    #wordsStage[hidden], #questionsStage[hidden] { display: none; }
-    .prompts, .questions { flex: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1.2vh 18px; }
-    .prompts li { padding: 0.6vh 12px; gap: 0.3vh 10px; }
-    .prompts label { font-size: clamp(0.85rem, 2vh, 1.05rem); }
-    .prompts input { font-size: clamp(1rem, 2.8vh, 1.4rem); padding: 0.4vh 10px; }
-    .prompts li::before, .questions li::before { width: 4.4vh; height: 4.4vh; font-size: 2vh; }
-    .questions li { padding: 0.8vh 14px; font-size: clamp(1rem, 3.1vh, 1.8rem); grid-template-columns: 4.4vh 1fr; }
-    .primary { min-height: 0; padding: 1.2vh 28px; font-size: clamp(1.1rem, 3vh, 1.5rem); }
-    .secondary { padding: 1vh 18px; font-size: clamp(0.9rem, 2.1vh, 1.1rem); }
+  @media (max-width: 640px) {
+    .tabs { order: 3; flex-basis: 100%; }
+    .tabs span { padding: 0 0.9rem; }
   }
-
-
-  @media (max-width: 760px) {
-    .steps { grid-template-columns: 1fr; gap: 6px; }
-    .steps b { display: inline; margin-right: 6px; }
-    .prompts, .questions { grid-template-columns: 1fr; }
+  @media (max-width: 860px) {
+    .cards { grid-template-columns: 1fr; }
+    .card { min-height: 0; padding-top: 4rem; }
+    .secondary { flex: 1 1 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .questions li { animation: none; }
+    .question { animation: none; }
   }
 </style>
 </head>
 <body>
-<main>
-  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
-  <h1>Input Output</h1>
+<main class="page">
+  <div class="top">
+    <h1>Input Output</h1>
+    <div class="tabs" role="radiogroup" aria-label="Level">
+      <label style="--lv: var(--coral)"><input type="radio" name="level" value="A" checked><span>A1–A2</span></label>
+      <label style="--lv: var(--sky)"><input type="radio" name="level" value="B"><span>B1–B2</span></label>
+    </div>
+    <a class="back" href="./">&larr; Question Time</a>
+  </div>
 
-  <ol class="steps">
-    <li><b>1</b>Suggest a word for each prompt.</li>
-    <li><b>2</b>Press Boom.</li>
-    <li><b>3</b>Work with a partner or group.</li>
-  </ol>
+  <div class="frame">
+    <p class="source" id="source">Suggest a word for each prompt, then press Boom.</p>
 
-  <section id="wordsStage">
-    <ol class="prompts" id="prompts"></ol>
-  </section>
+    <div class="cards" id="cards"></div>
 
-  <section id="questionsStage" hidden>
-    <ol class="questions" id="questions" aria-live="polite"></ol>
-  </section>
+    <div class="buttons">
+      <button class="btn primary" id="boomBtn" type="button">Boom</button>
+      <button class="btn primary" id="roundBtn" type="button" hidden>New round</button>
+      <button class="btn secondary" id="editBtn" type="button" hidden>Change words</button>
+      <button class="btn secondary" id="swapBtn" type="button">New prompts</button>
+    </div>
 
-  <div class="controls">
-    <button class="primary" id="makeBtn" type="button">Boom</button>
-    <button class="secondary" id="editBtn" type="button" hidden>Change words</button>
-    <button class="secondary" id="clearBtn" type="button">Start again</button>
+    <p class="hint" id="hint">Press Enter to move to the next box. Leave a box empty and the example is used.</p>
   </div>
 </main>
 
 <script>
 (function () {
-  // Each item: the prompt, its example placeholder(s), and the question it feeds.
-  // Use {0} (and {1}) where the word(s) go in the question.
+  /* ---------------------------------------------------------------
+     The bank. Each round takes three at random from the chosen level,
+     and none comes back until that level's bank has been used.
+     Each item: the level (A, B, or AB for both), the prompt, its
+     example(s), and the question it feeds.
+     Use {0} (and {1}) where the word(s) go in the question.
+     form: "past" or "ing" changes the first word to fit the question.
+  ---------------------------------------------------------------- */
   const ITEMS = [
-    { prompt: "An activity you enjoy doing",       eg: ["basketball"],            q: "What is the objective of {0}?" },
-    { prompt: "Something you sometimes do",         eg: ["go to the cinema"],      q: "When was the last time you {0}?", form: "past" },
-    { prompt: "An everyday activity (-ing)",        eg: ["cooking"],               q: "Do you agree that {0} is important? Why / Why not?", form: "ing" },
-    { prompt: "A place in your town",               eg: ["the beach"],             q: "What is the best thing about {0}?" },
-    { prompt: "Another place in your town",         eg: ["the library"],           q: "What is the worst thing about {0}?" },
-    { prompt: "Two subjects at school",             eg: ["maths", "history"],      q: "Which is better: {0} or {1}?" },
-    { prompt: "Two countries on our planet",        eg: ["Spain", "Japan"],        q: "Are there any similarities between {0} and {1}?" },
-    { prompt: "An app, game or website",            eg: ["YouTube"],              q: "What problems can {0} cause?" },
-    { prompt: "Your favourite sport or hobby",      eg: ["swimming"],              q: "What advice could you give someone about {0}?" },
-    { prompt: "An object in the house (plural)",    eg: ["chairs"],                q: "How might {0} be different in the future?" },
-  ];
+    /* ---------- A level (A1 and A2) ---------- */
+    { lv: "A",  prompt: "An activity you enjoy doing",        eg: ["basketball"],          q: "What do you need for {0}?" },
+    { lv: "A",  prompt: "A place in your town",               eg: ["the beach"],           q: "What is the best thing about {0}?" },
+    { lv: "A",  prompt: "A place in your town",               eg: ["the library"],         q: "What is the worst thing about {0}?" },
+    { lv: "A",  prompt: "Two subjects at school",             eg: ["maths", "history"],    q: "Which is better: {0} or {1}?" },
+    { lv: "A",  prompt: "A job",                              eg: ["a pilot"],             q: "What skills do you need to be {0}?" },
+    { lv: "A",  prompt: "A season",                           eg: ["summer"],              q: "What do you love most about {0}?" },
+    { lv: "A",  prompt: "Something you like doing",           eg: ["dancing"],             q: "Is {0} better alone or with friends?", form: "ing" },
+    { lv: "A",  prompt: "Something you do every day",         eg: ["have breakfast"],      q: "What time do you usually {0}?" },
+    { lv: "A",  prompt: "A type of weather",                  eg: ["rain"],                q: "What is the best thing to do in the {0}?" },
+    { lv: "A",  prompt: "A place you've visited",             eg: ["Seville"],             q: "What should a tourist see in {0}?" },
+    { lv: "A",  prompt: "Something you're good at",           eg: ["drawing"],             q: "When did you start {0}?", form: "ing" },
+    { lv: "A",  prompt: "An animal",                          eg: ["a penguin"],           q: "Where does {0} live?" },
+    { lv: "A",  prompt: "A colour",                           eg: ["blue"],                q: "What things in this room are {0}?" },
+    { lv: "A",  prompt: "A day of the week",                  eg: ["Saturday"],            q: "What do you usually do on {0}?" },
+    { lv: "A",  prompt: "A room in a house",                  eg: ["the kitchen"],         q: "What can you find in {0}?" },
+    { lv: "A",  prompt: "A sport with a ball",                eg: ["tennis"],              q: "Can you play {0}? Who taught you?" },
+    { lv: "A",  prompt: "A drink",                            eg: ["orange juice"],        q: "When do you drink {0}?" },
+    { lv: "A",  prompt: "Something in the classroom (plural)", eg: ["chairs"],             q: "How many {0} are there in this classroom?" },
+    { lv: "A",  prompt: "A job",                              eg: ["a doctor"],            q: "What does {0} do every day?" },
+    { lv: "A",  prompt: "A month",                            eg: ["August"],              q: "What's the weather like in {0}?" },
+    { lv: "A",  prompt: "Something you do at the weekend",    eg: ["play football"],       q: "Where do you {0}?" },
+    { lv: "A",  prompt: "A shop in your town",                eg: ["the supermarket"],     q: "What can you buy at {0}?" },
 
+    /* ---------- Both levels ---------- */
+    { lv: "AB", prompt: "Something you sometimes do",         eg: ["go to the cinema"],    q: "When was the last time you {0}?", form: "past" },
+    { lv: "AB", prompt: "Something you can do",               eg: ["ride a bike"],         q: "How old were you when you first {0}?", form: "past" },
+    { lv: "AB", prompt: "A food you love",                    eg: ["pizza"],               q: "Could you eat {0} every day for a month? Why / Why not?" },
+    { lv: "AB", prompt: "Two animals (plural)",               eg: ["cats", "dogs"],        q: "Who would win a race: {0} or {1}? Why?" },
+    { lv: "AB", prompt: "An invention",                       eg: ["the internet"],        q: "How did people live before {0}?" },
+
+    /* ---------- B level (B1 and B2) ---------- */
+    { lv: "B",  prompt: "An activity you enjoy doing",        eg: ["basketball"],          q: "What is the objective of {0}?" },
+    { lv: "B",  prompt: "An everyday activity",               eg: ["cooking"],             q: "Do you agree that {0} is important? Why / Why not?", form: "ing" },
+    { lv: "B",  prompt: "Two countries",                      eg: ["Spain", "Japan"],      q: "Are there any similarities between {0} and {1}?" },
+    { lv: "B",  prompt: "An app, game or website",            eg: ["YouTube"],             q: "What problems can {0} cause?" },
+    { lv: "B",  prompt: "Your favourite sport or hobby",      eg: ["swimming"],            q: "What advice could you give someone about {0}?" },
+    { lv: "B",  prompt: "An object in the house (plural)",    eg: ["chairs"],              q: "How might {0} be different in the future?" },
+    { lv: "B",  prompt: "A famous person",                    eg: ["Rosalía"],             q: "If you could ask {0} one question, what would it be?" },
+    { lv: "B",  prompt: "An animal",                          eg: ["a penguin"],           q: "What would life be like as {0}?" },
+    { lv: "B",  prompt: "Something you couldn't live without", eg: ["music"],              q: "What would you do without {0} for a week?" },
+    { lv: "B",  prompt: "A film or series",                   eg: ["Stranger Things"],     q: "Would you recommend {0} to your grandparents? Why / Why not?" },
+    { lv: "B",  prompt: "A city you'd like to visit",         eg: ["New York"],            q: "What would you do on your first day in {0}?" },
+    { lv: "B",  prompt: "Two foods",                          eg: ["chips", "salad"],      q: "Which would you choose to eat for the rest of your life: {0} or {1}?" },
+    { lv: "B",  prompt: "Something in your bag",              eg: ["a pen"],               q: "How could you use {0} to escape from a desert island?" },
+    { lv: "B",  prompt: "Something you'd like to learn to do", eg: ["play the guitar"],    q: "How long would it take to learn to {0}?" },
+    { lv: "B",  prompt: "A colour",                           eg: ["green"],               q: "What would the world be like if everything was {0}?" },
+    { lv: "B",  prompt: "Something you're good at",           eg: ["drawing"],             q: "How did you get good at {0}?", form: "ing" },
+    { lv: "B",  prompt: "Something people waste",             eg: ["water"],               q: "How can we waste less {0}?" },
+    { lv: "B",  prompt: "A tradition or celebration",         eg: ["Carnival"],            q: "How would you explain {0} to someone from another country?" },
+    { lv: "B",  prompt: "A problem in your town",             eg: ["traffic"],             q: "How could your town solve the problem of {0}?" },
+    { lv: "B",  prompt: "Something popular right now",        eg: ["TikTok"],              q: "Will {0} still be popular in ten years? Why / Why not?" },
+    { lv: "B",  prompt: "A skill everyone should have",       eg: ["cooking"],             q: "Should schools teach {0}? Why / Why not?" },
+    { lv: "B",  prompt: "A famous building",                  eg: ["the Alhambra"],        q: "What would you change about {0} if you could?" }
+  ];
 
   // ---- Verb helpers: turn "go to the cinema" into "went to the cinema", "cook" into "cooking"
   const IRREGULAR = {
@@ -257,101 +314,168 @@
     return changed + m[4];
   }
 
-  const promptsEl = document.getElementById("prompts");
-  const questionsEl = document.getElementById("questions");
-  const wordsStage = document.getElementById("wordsStage");
-  const questionsStage = document.getElementById("questionsStage");
-  const makeBtn = document.getElementById("makeBtn");
-  const editBtn = document.getElementById("editBtn");
-  const clearBtn = document.getElementById("clearBtn");
+  const PER_ROUND = 3;
+  const $ = id => document.getElementById(id);
+  const cardsEl = $("cards");
+  const boomBtn = $("boomBtn"), roundBtn = $("roundBtn"), editBtn = $("editBtn"), swapBtn = $("swapBtn");
 
-  // Build the prompt boxes
-  const inputs = [];
-  ITEMS.forEach((item, i) => {
-    const li = document.createElement("li");
-    li.className = "li-" + (i + 1);
-    const id = "w" + i;
-    const label = document.createElement("label");
-    label.htmlFor = id + "a";
-    label.textContent = item.prompt;
-    const wrap = document.createElement("div");
-    wrap.className = "pair";
-    item.eg.forEach((eg, j) => {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = id + (j ? "b" : "a");
-      input.placeholder = eg;
-      input.autocomplete = "off";
-      input.spellcheck = false;
-      if (item.eg.length > 1) input.setAttribute("aria-label", item.prompt + " (" + (j + 1) + ")");
-      wrap.appendChild(input);
-      inputs.push(input);
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+
+  /* The level: A (A1 and A2) or B (B1 and B2), remembered for next time */
+  let level = "A";
+  try { if (localStorage.getItem("inputoutput.level") === "B") level = "B"; } catch (e) {}
+  const bankFor = lv => ITEMS.filter(item => item.lv.includes(lv));
+
+  /* A shuffled deck per level, so prompts don't come back until that bank is used up */
+  const decks = {};
+  function drawRound() {
+    const picked = [];
+    while (picked.length < PER_ROUND) {
+      if (!decks[level] || !decks[level].length) decks[level] = shuffle(bankFor(level));
+      const item = decks[level].pop();
+      if (!picked.includes(item)) picked.push(item);
+    }
+    return picked;
+  }
+
+  let round = [];       // the three items this round
+  let inputs = [];      // every input box this round, in order
+  let mode = "input";
+
+  /* ---------- Stage 1: prompts and boxes ---------- */
+  function showPrompts(keepWords) {
+    const words = keepWords ? inputs.map(i => i.value) : [];
+    cardsEl.innerHTML = "";
+    inputs = [];
+    round.forEach((item, i) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = '<span class="num" aria-hidden="true">' + (i + 1) + '</span>';
+
+      const label = document.createElement("label");
+      label.className = "prompt";
+      label.htmlFor = "w" + i + "a";
+      label.textContent = item.prompt;
+
+      const wrap = document.createElement("div");
+      wrap.className = "inputs";
+      item.eg.forEach((eg, j) => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "w" + i + (j ? "b" : "a");
+        input.placeholder = eg;
+        input.autocomplete = "off";
+        input.spellcheck = false;
+        if (item.eg.length > 1) input.setAttribute("aria-label", item.prompt + " (" + (j + 1) + ")");
+        input.value = words[inputs.length] || "";
+        wrap.appendChild(input);
+        inputs.push(input);
+      });
+
+      card.append(label, wrap);
+      cardsEl.appendChild(card);
     });
-    li.append(label, wrap);
-    promptsEl.appendChild(li);
-  });
 
-  // Enter moves to the next box; on the last box it makes the questions
-  inputs.forEach((input, k) => {
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
+    /* Enter moves to the next box; on the last box it goes Boom */
+    inputs.forEach((input, k) => {
+      input.addEventListener("keydown", e => {
+        if (e.key !== "Enter") return;
         e.preventDefault();
         if (k < inputs.length - 1) inputs[k + 1].focus();
-        else makeQuestions();
-      }
+        else boom();
+      });
     });
-  });
 
-  function makeQuestions() {
-    questionsEl.innerHTML = "";
+    mode = "input";
+    boomBtn.hidden = false; swapBtn.hidden = false;
+    roundBtn.hidden = true; editBtn.hidden = true;
+    $("source").textContent = "Suggest a word for each prompt, then press Boom.";
+    $("hint").textContent = "Press Enter to move to the next box. Leave a box empty and the example is used.";
+  }
+
+  /* ---------- Stage 2: the questions ---------- */
+  function boom() {
+    const values = inputs.map(i => ({ typed: i.value.trim(), eg: i.placeholder }));
     let k = 0;
-    ITEMS.forEach((item, i) => {
-      const li = document.createElement("li");
-      li.className = "li-" + (i + 1);
-      li.style.setProperty("--i", i);
-      const words = item.eg.map(() => inputs[k++]);
-      const text = document.createElement("span");
+    const cards = [...cardsEl.children];
+    round.forEach((item, i) => {
+      const words = item.eg.map(() => values[k++]);
+      const q = document.createElement("p");
+      q.className = "question";
+      q.style.setProperty("--i", i);
       item.q.split(/(\{\d\})/).forEach(part => {
         const m = part.match(/^\{(\d)\}$/);
         if (m) {
-          const input = words[+m[1]];
-          const mark = document.createElement("mark");
-          const typed = input.value.trim();
-          let word = typed || input.placeholder;
+          const w = words[+m[1]];
+          let word = w.typed || w.eg;
           if (item.form) word = reform(word, item.form);
+          const mark = document.createElement("mark");
           mark.textContent = word;
-          if (!typed) mark.classList.add("guess");
-          text.appendChild(mark);
+          if (!w.typed) mark.classList.add("guess");
+          q.appendChild(mark);
         } else if (part) {
-          text.appendChild(document.createTextNode(part));
+          q.appendChild(document.createTextNode(part));
         }
       });
-      li.appendChild(text);
-      questionsEl.appendChild(li);
+      const card = cards[i];
+      card.querySelector(".prompt").hidden = true;
+      card.querySelector(".inputs").hidden = true;
+      card.appendChild(q);
     });
-    wordsStage.hidden = true;
-    questionsStage.hidden = false;
-    makeBtn.hidden = true;
-    editBtn.hidden = false;
-    editBtn.focus();
+
+    mode = "output";
+    boomBtn.hidden = true; swapBtn.hidden = true;
+    roundBtn.hidden = false; editBtn.hidden = false;
+    $("source").textContent = "Work with a partner or group and answer the questions.";
+    $("hint").textContent = "New round brings three new prompts. Change words goes back to these ones.";
+    roundBtn.focus();
   }
 
-  function editWords() {
-    questionsStage.hidden = true;
-    wordsStage.hidden = false;
-    makeBtn.hidden = false;
-    editBtn.hidden = true;
+  function changeWords() {
+    [...cardsEl.children].forEach(card => {
+      const q = card.querySelector(".question");
+      if (q) q.remove();
+      card.querySelector(".prompt").hidden = false;
+      card.querySelector(".inputs").hidden = false;
+    });
+    mode = "input";
+    boomBtn.hidden = false; swapBtn.hidden = false;
+    roundBtn.hidden = true; editBtn.hidden = true;
+    $("source").textContent = "Suggest a word for each prompt, then press Boom.";
+    $("hint").textContent = "Press Enter to move to the next box. Leave a box empty and the example is used.";
     inputs[0].focus();
   }
 
-  function startAgain() {
-    inputs.forEach(i => { i.value = ""; });
-    editWords();
+  function newRound() {
+    round = drawRound();
+    showPrompts(false);
+    inputs[0].focus();
   }
 
-  makeBtn.addEventListener("click", makeQuestions);
-  editBtn.addEventListener("click", editWords);
-  clearBtn.addEventListener("click", startAgain);
+  boomBtn.addEventListener("click", boom);
+  roundBtn.addEventListener("click", newRound);
+  editBtn.addEventListener("click", changeWords);
+  /* New prompts swaps the three before Boom, in case one doesn't suit the class */
+  swapBtn.addEventListener("click", newRound);
+
+  /* Level tabs: changing level deals a fresh round */
+  document.querySelectorAll('input[name="level"]').forEach(r => {
+    r.checked = r.value === level;
+    r.addEventListener("change", () => {
+      level = r.value;
+      try { localStorage.setItem("inputoutput.level", level); } catch (e) {}
+      newRound();
+    });
+  });
+
+  round = drawRound();
+  showPrompts(false);
 })();
 </script>
 </body>
