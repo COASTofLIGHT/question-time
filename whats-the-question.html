@@ -12,9 +12,11 @@
     --mist: #EDF3F2;
     --ink: #10303A;
     --ink-soft: #456670;
+    --line: #5F808A;
+    --sea: #17677A;
+    --sea-deep: #124F5E;
     --focus: #0B62A4;
     --panel: #F9FBFB;
-    --line: rgba(16, 48, 58, 0.14);
     /* Level colours, as in Word Lab */
     --a1: #F2D9A6;  /* sand yellow */
     --a2: #F4B5A0;  /* coral orange */
@@ -22,71 +24,99 @@
     --b2: #A8D5CB;  /* sea green */
     --level: var(--a2);
     --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
-    box-sizing: border-box;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--mist);
+    color: var(--ink);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  *, *::before, *::after { box-sizing: border-box; }
-  html { height: 100%; }
-  body {
-    margin: 0; min-height: 100%;
-    background: var(--mist); color: var(--ink);
-    font-family: var(--font);
-    -webkit-text-size-adjust: 100%;
-  }
-  main {
-    max-width: 960px; margin: 0 auto;
-    padding: clamp(1rem, 3vw, 2rem);
-    display: flex; flex-direction: column; gap: 0.8rem;
-  }
   button { font-family: var(--font); color: var(--ink); }
-  button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
 
-  .back { align-self: flex-start; color: var(--ink-soft); font-size: 0.95rem; text-decoration: none; }
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.25rem);
+  }
+
+  /* ---------- Title, level tabs and the way back (as on Wordlists) ---------- */
+  .top { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: clamp(1rem, 2.5vw, 2rem); }
+  .top h1 { margin: 0 0 0.6rem; font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .back { margin: 0 0 0.75rem auto; color: var(--ink-soft); font-size: 0.9rem; text-decoration: none; white-space: nowrap; }
   .back:hover { text-decoration: underline; }
   .back:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
-  .hint { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 1.05rem; }
-
-  /* Pickers */
-  .row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; align-items: center; }
-  fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  legend { float: left; margin-right: 8px; color: var(--ink-soft); font-size: 0.95rem; }
-  .seg { position: relative; }
-  .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .seg span {
-    display: inline-block; padding: 8px 15px; border-radius: 999px;
-    border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 1rem;
+  /* The levels are the tabs. Each keeps a small dot in its level colour. */
+  .tabs { display: flex; gap: 0.2rem; }
+  .tabs label { position: relative; display: block; }
+  .tabs input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .tabs span {
+    display: flex; align-items: center; gap: 0.45rem;
+    height: 2.75rem; padding: 0 1.15rem; border-radius: 0.7rem 0.7rem 0 0;
+    color: var(--ink-soft); font-size: 1rem; font-weight: 700; white-space: nowrap;
   }
-  .seg input:checked + span { background: var(--ink); color: var(--mist); border-color: var(--ink); }
-  .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
-  /* Level chips show their colour when picked */
-  .levels .seg input:checked + span { color: var(--ink); border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; }
-  .levels .seg input[value="a1"]:checked + span { background: var(--a1); }
-  .levels .seg input[value="a2"]:checked + span { background: var(--a2); }
-  .levels .seg input[value="b1"]:checked + span { background: var(--b1); }
-  .levels .seg input[value="b2"]:checked + span { background: var(--b2); }
+  .tabs span::before { content: ""; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--lv); }
+  .tabs input:hover + span { background: rgba(255, 255, 255, 0.55); color: var(--ink); }
+  .tabs input:checked + span { background: var(--panel); color: var(--ink); }
+  .tabs input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: -3px; }
 
-  /* The box */
+  /* ---------- The frame everything sits on ---------- */
+  .frame { display: flex; flex-direction: column; gap: 0.9rem; background: var(--panel); border-radius: 0.9rem; padding: clamp(0.8rem, 2vw, 1.4rem); }
+  .source { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+
+  /* Twist */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.75rem; }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; }
+  .group-label { font-weight: 600; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .choices label { position: relative; display: block; }
+  .choices input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .choices span {
+    display: grid; place-items: center;
+    min-width: 2.75rem; height: 2.75rem; padding: 0 1rem;
+    border: 2px solid var(--line); border-radius: 0.6rem;
+    font-size: 1.1rem; font-weight: 700;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .choices input:not(:checked):hover + span { border-color: var(--ink); }
+  .choices input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--mist); }
+  .choices input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  /* ---------- The question box, in the level colour ---------- */
   .box {
     position: relative;
-    border: 0; width: 100%; cursor: pointer; text-align: left;
-    background: var(--level);
-    border-radius: 1.4rem;
-    min-height: clamp(240px, 44vh, 420px);
+    width: 100%;
+    min-height: clamp(15rem, calc(100vh - 22rem), 30rem);
     padding: clamp(1.4rem, 4vw, 3rem);
-    display: flex; flex-direction: column; justify-content: center; gap: 1rem;
+    border: 0;
+    border-radius: 0.9rem;
+    background: var(--level);
+    text-align: left;
+    cursor: pointer;
+    display: flex; flex-direction: column; justify-content: center;
     transition: background-color 250ms ease;
   }
-  .box:hover { filter: brightness(0.99); }
+  @supports (height: 100svh) {
+    .box { min-height: clamp(15rem, calc(100svh - 22rem), 30rem); }
+  }
+  .box:hover { filter: brightness(0.98); }
+  .box:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
   .count {
     position: absolute; top: 1rem; right: 1.3rem;
-    font-size: 0.85rem; opacity: 0.55; font-variant-numeric: tabular-nums;
+    font-size: 0.9rem; font-weight: 600; opacity: 0.55; font-variant-numeric: tabular-nums;
   }
-  .label { margin: 0; font-size: 1rem; font-weight: 700; opacity: 0.7; }
   .content { display: flex; flex-direction: column; gap: 1.2rem; transition: opacity 300ms ease; }
   .content.fading { opacity: 0; }
+  .label { margin: 0; font-size: 1rem; font-weight: 700; opacity: 0.7; }
   .answer {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800;
@@ -94,70 +124,82 @@
   }
   .answer::before { content: "\201C"; }
   .answer::after { content: "\201D"; }
+  .reveal { display: flex; flex-direction: column; align-items: flex-start; min-height: 3.6rem; }
   .example {
     margin: 0; font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-    background: var(--panel); border-radius: 0.8rem; padding: 0.6em 0.9em; align-self: flex-start;
+    background: var(--panel); border-radius: 0.6rem; padding: 0.6em 0.9em; cursor: default;
   }
   .example span { color: var(--ink-soft); font-size: 0.8em; display: block; margin-bottom: 0.15em; }
   .example b { font-weight: 800; }
-  .example[hidden] { display: none; }
 
-  .controls { display: flex; justify-content: flex-end; gap: 0.8rem; flex-wrap: wrap; }
-  .reveal { display: flex; flex-direction: column; align-items: flex-start; gap: 0.7rem; min-height: 3.6rem; }
+  /* ---------- Next ---------- */
+  .buttons { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .show {
-    border: 2px solid var(--ink); cursor: pointer; border-radius: 0.9rem; background: var(--panel);
-    font-size: 1.2rem; font-weight: 700; padding: 10px 22px; min-height: 56px;
+    height: 3.25rem; padding: 0 1.4rem;
+    border: 0; border-radius: 0.6rem;
+    background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line);
+    font-size: 1.1rem; font-weight: 700; cursor: pointer;
   }
-  .show:hover { background: #fff; }
+  .show:hover { box-shadow: inset 0 0 0 2px var(--ink); }
+  .show:active { transform: translateY(1px); }
+  .show:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
   .next {
-    border: 0; cursor: pointer; border-radius: 0.9rem; background: var(--ink); color: var(--mist);
-    font-size: 1.4rem; font-weight: 800; padding: 12px 34px; min-height: 56px;
+    flex: 1 1 12rem; height: 3.25rem; padding: 0 1.6rem;
+    border: 0; border-radius: 0.6rem;
+    background: var(--sea); color: #fff;
+    font-size: 1.2rem; font-weight: 700; cursor: pointer;
   }
-  .next:hover { background: #1B4652; }
+  .next:hover { background: var(--sea-deep); }
+  .next:active { transform: translateY(1px); }
+  .next:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
-  footer { color: var(--ink-soft); font-size: 0.85rem; }
+  .hint { margin: 0.2rem 0 0; color: var(--ink-soft); font-size: 0.95rem; }
 
+  @media (max-width: 640px) {
+    .tabs { order: 3; flex-basis: 100%; }
+    .tabs span { padding: 0 0.9rem; }
+    .show { flex: 1 1 100%; }
+    .box { min-height: 16rem; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .content, .box { transition: none; }
+    .content, .box, .choices span { transition: none; }
   }
 </style>
 </head>
 <body>
-<main>
-  <a class="back" href="https://coastoflight.github.io/question-time/">&larr; Question Time</a>
-
-  <header>
+<main class="page">
+  <div class="top">
     <h1>What's the Question?</h1>
-    <p class="hint">Here's the answer. Can you make the question?</p>
-  </header>
-
-  <div class="row">
-    <fieldset class="levels">
-      <legend>Level</legend>
-      <label class="seg"><input type="radio" name="level" value="a1"><span>A1</span></label>
-      <label class="seg"><input type="radio" name="level" value="a2" checked><span>A2</span></label>
-      <label class="seg"><input type="radio" name="level" value="b1"><span>B1</span></label>
-      <label class="seg"><input type="radio" name="level" value="b2"><span>B2</span></label>
-    </fieldset>
+    <div class="tabs" role="radiogroup" aria-label="Level">
+      <label style="--lv: var(--a1)"><input type="radio" name="level" value="a1"><span>A1</span></label>
+      <label style="--lv: var(--a2)"><input type="radio" name="level" value="a2" checked><span>A2</span></label>
+      <label style="--lv: var(--b1)"><input type="radio" name="level" value="b1"><span>B1</span></label>
+      <label style="--lv: var(--b2)"><input type="radio" name="level" value="b2"><span>B2</span></label>
+    </div>
+    <a class="back" href="./">&larr; Question Time</a>
   </div>
 
-  <div class="box" id="box">
-    <span class="count" id="count"></span>
-    <div class="content" id="content">
-      <span class="label">The answer is…</span>
-      <p class="answer" id="answer" aria-live="polite"></p>
-      <div class="reveal">
-        <p class="example" id="example" hidden><span>One possible question</span><b id="question"></b></p>
+  <div class="frame">
+    <p class="source">Here's the answer. Can you make the question?</p>
+
+    <div class="box" id="box">
+      <span class="count" id="count"></span>
+      <div class="content" id="content">
+        <span class="label">The answer is&hellip;</span>
+        <p class="answer" id="answer" aria-live="polite"></p>
+        <div class="reveal">
+          <p class="example" id="example" hidden><span>One possible question</span><b id="question"></b></p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="controls">
-    <button class="show" type="button" id="show">Show an example question</button>
-    <button class="next" type="button" id="next">Next</button>
-  </div>
+    <div class="buttons">
+      <button class="show" type="button" id="show">Show an example question</button>
+      <button class="next" type="button" id="next">Next answer</button>
+    </div>
 
-  <footer>Tap the box, press Next or press Space for a new answer. There's usually more than one good question, so the one shown is just an example.</footer>
+    <p class="hint">Tap the box, press Next answer or press Space for a new answer. There's usually more than one good question, so the one shown is just an example.</p>
+  </div>
 </main>
 
 <script>
